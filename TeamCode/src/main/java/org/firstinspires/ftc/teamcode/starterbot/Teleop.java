@@ -6,23 +6,18 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp(name = "StartBotTeleop")
 public class Teleop extends LinearOpMode {
-    public DcMotorEx backLeft, backRight, frontLeft, frontRight;
+    public DcMotorEx right, left;
 
     @Override
     public void runOpMode() {
-        //init
-
-        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
-        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
-        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        right = hardwareMap.get(DcMotorEx.class, "right");
+        left = hardwareMap.get(DcMotorEx.class, "left");
 
         waitForStart();
 
-        backLeft.setPower(gamepad1.left_stick_y);
-        frontLeft.setPower(gamepad1.left_stick_y);
-
-        frontRight.setPower(gamepad1.right_stick_y);
-        frontRight.setPower(gamepad1.right_stick_y);
+        while (opModeIsActive()) {
+            right.setPower(gamepad1.right_stick_y);
+            left.setPower(gamepad1.left_stick_y);
+        }
     }
 }
