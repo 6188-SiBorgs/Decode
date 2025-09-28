@@ -2,12 +2,18 @@ package org.firstinspires.ftc.teamcode.starterbot;
 
 import android.annotation.SuppressLint;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Chassis;
 
 @TeleOp(name="StarterBotTester")
@@ -24,6 +30,14 @@ public class StarterBotTest extends LinearOpMode {
         right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right.setDirection(DcMotorSimple.Direction.REVERSE);
+        IMU imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+                        RevHubOrientationOnRobot.UsbFacingDirection.UP
+                ))
+        );
+        imu.resetYaw();
 
         waitForStart();
         int lastPosition = 0;
@@ -41,11 +55,17 @@ public class StarterBotTest extends LinearOpMode {
         right.setPower(1);
         left.setPower(1);
         while (opModeIsActive() && testing) {
+            Orientation orientation = imu.getRobotOrientation(
+                    AxesReference.INTRINSIC,
+                    AxesOrder.ZYX,
+                    AngleUnit.DEGREES
+            );
+            telemetry.addData("yaw", orientation.firstAngle);
             double dt = (System.currentTimeMillis() - lastDeltaTime);
             lastDeltaTime = System.currentTimeMillis();
-            telemetry.addData("position", right.getCurrentPosition())
+            telemetry.addData("position", right.getCurrentPosition());
             int currentPosition = right.getCurrentPosition();
-            double velocity = (lastPosition - currentPosition) / dt;
+            double velocity = (currentPosition - lastPosition) / dt;
             lastPosition = currentPosition;
 
             if (!stopping && System.currentTimeMillis() - startTime > 2000) {
