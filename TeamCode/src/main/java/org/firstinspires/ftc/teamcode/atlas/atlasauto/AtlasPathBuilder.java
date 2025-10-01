@@ -15,10 +15,11 @@ public class AtlasPathBuilder {
     private final ArrayList<Node> nodes = new ArrayList<>();
     private double rotation = 0;
     private final AtlasAutoOp opMode;
-    public AtlasPathBuilder(AtlasAutoOp opMode, double x, double y, double r) {
+    double distancePerWaypoint;
+    public AtlasPathBuilder(AtlasAutoOp opMode, double x, double y, double r, double d) {
 
         this.opMode = opMode;
-
+        distancePerWaypoint = d;
         Node initial = new Node(x, y);
         rotation = r;
         nodes.add(initial);
@@ -51,7 +52,7 @@ public class AtlasPathBuilder {
             Vector2 p1 = current.h2x == Double.MAX_VALUE ? p0 : new Vector2(current.x, current.y);
             Vector2 p3 = new Vector2(current.x, current.y);
             Vector2 p2 = next.h1x == Double.MAX_VALUE ? p3 : new Vector2(current.x, current.y);
-            ArrayList<Vector2> points = BezierUtils.sampleCubicBezier(p0, p1, p2, p3, 0.1);
+            ArrayList<Vector2> points = BezierUtils.sampleCubicBezier(p0, p1, p2, p3, distancePerWaypoint);
 
             if (current.r != Double.MAX_VALUE) {
                 rotationState = current.r;

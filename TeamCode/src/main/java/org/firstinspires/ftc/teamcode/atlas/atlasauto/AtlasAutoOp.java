@@ -8,10 +8,10 @@ public abstract class AtlasAutoOp extends LinearOpMode {
     public AtlasFollower follower;
 
     public boolean canSleep = true;
-
+    AtlasParameters parameters;
     @Override
     public void runOpMode() {
-        AtlasParameters parameters = create();
+        parameters = create();
         if (parameters == null) {
             throw new NullPointerException("AtlasAuto create() method must return an AtlasParameters object");
         }
@@ -45,7 +45,7 @@ public abstract class AtlasAutoOp extends LinearOpMode {
     void tickLoop() {}
 
     public AtlasPathBuilder startPath() {
-        return new AtlasPathBuilder(this, chassis.pose.x, chassis.pose.y, chassis.yawDeg);
+        return new AtlasPathBuilder(this, chassis.pose.x, chassis.pose.y, chassis.yawDeg, parameters.distancePerWaypoint);
     }
     public AtlasPathBuilder move(double x, double y) { return move(x, y, 1); }
     public AtlasPathBuilder move(double x, double y, double speed) { return moveTo(chassis.pose.x + x, chassis.pose.y + y, speed); }

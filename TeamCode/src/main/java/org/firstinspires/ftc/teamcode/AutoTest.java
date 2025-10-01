@@ -10,7 +10,7 @@ public class AutoTest extends AtlasAutoOp {
     @Override
     public AtlasParameters create() {
         Chassis chassis = new Chassis(hardwareMap);
-        return new AtlasParameters(chassis, 1, 1);
+        return new AtlasParameters(chassis, 1, 1, 0.05);
     }
 
     @Override
