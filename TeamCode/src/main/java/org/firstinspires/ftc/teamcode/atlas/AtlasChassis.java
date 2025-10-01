@@ -31,7 +31,7 @@ public class AtlasChassis {
     public int frontLeftTicks = 0;
     public int frontRightTicks = 0;
 
-    public double metersPerTick = 1.0;
+    public double metersPerTick = 0.00048;
     public double fieldRelativeOffset = 0.0;
 
     private long lastUpdateTime = System.currentTimeMillis();

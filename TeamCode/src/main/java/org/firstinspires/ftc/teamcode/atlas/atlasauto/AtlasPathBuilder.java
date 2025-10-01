@@ -76,6 +76,7 @@ public class AtlasPathBuilder {
             }
         }
         timer = System.currentTimeMillis() - timer;
+        opMode.follower.run(waypoints);
         opMode.canSleep = true;
     }
 
