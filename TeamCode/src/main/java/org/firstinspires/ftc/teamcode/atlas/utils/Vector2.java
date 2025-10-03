@@ -39,4 +39,8 @@ public class Vector2 {
     public static double magnitude(Vector2 vector) {
         return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
+
+    public String toString() {
+        return String.format("(%.2f, %.2f)", x, y);
+    }
 }
