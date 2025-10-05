@@ -16,14 +16,14 @@ public class RotationTest extends LinearOpMode {
         long startTime = System.currentTimeMillis();
         while (opModeIsActive()) {
             chassis.update(telemetry);
-            chassis.movePower(0, 0, 1);
+            chassis.movePower(0, 0, -1);
             telemetry.addData("yaw", chassis.yawDeg);
             telemetry.update();
 
             if (chassis.yawDeg < -90) {
                 negetive = true;
             }
-            if (chassis.yawDeg > -1 && negetive) {
+            if (chassis.yawDeg > -45 && negetive) {
                 break;
             }
         }

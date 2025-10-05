@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.Chassis;
 
 import static java.lang.Math.*;
 
@@ -25,6 +26,7 @@ public class AtlasChassis {
     public double yawRads = 0.0;
     public double yawDeg = 0.0;
     public double limeLightYawOffset = 0.0;
+    public double robotYawOffset = 0.0;
 
     public int backLeftTicks = 0;
     public int backRightTicks = 0;
@@ -37,25 +39,25 @@ public class AtlasChassis {
     private long lastUpdateTime = System.currentTimeMillis();
 
     public static final double RAD_TO_DEG = 180.0 / Math.PI;
+    public static final double DEG_TO_RAD = Math.PI / 180.0;
 
     private DcMotor.ZeroPowerBehavior zeroPowerBehavior;
-    public AtlasChassis(HardwareMap hardwareMap) {
-        zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE;
-        backLeft = getDcMotorEx(hardwareMap, "rearLeft", true);
-        backRight = getDcMotorEx(hardwareMap, "rearRight", true);
-        frontLeft = getDcMotorEx(hardwareMap, "frontLeft", false);
-        frontRight = getDcMotorEx(hardwareMap, "frontRight", false);
+    public AtlasChassis() {
+
+    }
+
+    public void init(HardwareMap hardwareMap, ChassisConfig config) {
+        zeroPowerBehavior = config.zeroPowerBehavior;
+        backLeft = getDcMotorEx(hardwareMap, config.backLeftName, config.backLeftIsReversed);
+        backRight = getDcMotorEx(hardwareMap, config.backRightName, config.backRightIsReversed);
+        frontLeft = getDcMotorEx(hardwareMap, config.frontLeftName, config.frontLeftIsReversed);
+        frontRight = getDcMotorEx(hardwareMap, config.frontRightName, config.frontRightIsReversed);
         // Make sure imu exists in hardware map
         imu = hardwareMap.get(IMU.class, "imu");
 
         pose = new AtlasPose(metersPerTick);
 
-        imu.initialize(new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                ))
-        );
+        imu.initialize(config.imuParameters);
         imu.resetYaw();
     }
 
@@ -118,8 +120,8 @@ public class AtlasChassis {
                 AngleUnit.RADIANS
         );
 
-        yawRads = orientation.firstAngle;
-        yawDeg = orientation.firstAngle * RAD_TO_DEG;
+        yawRads = orientation.firstAngle + robotYawOffset * DEG_TO_RAD;
+        yawDeg = orientation.firstAngle * RAD_TO_DEG + robotYawOffset;
 
         int[] positions = new int[]{
                 backLeft.getCurrentPosition(),
