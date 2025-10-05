@@ -59,6 +59,10 @@ public class AtlasPose {
 //        y = (1 - k) * pose.y + k * visionPose.y;
 //    }
 
+    public String toString() {
+        return String.format("<AtlasPose %.2f, %.2f>", x, y);
+    }
+
     public static class PastState {
         public final long time;
         public final double dx;

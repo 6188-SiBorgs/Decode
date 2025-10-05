@@ -9,23 +9,27 @@ import org.firstinspires.ftc.teamcode.atlas.utils.Vector2;
 import org.firstinspires.ftc.teamcode.atlas.utils.Waypoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 public class AtlasPathBuilder {
     private final ArrayList<Node> nodes = new ArrayList<>();
     private double rotation = 0;
     private final AtlasAutoOp opMode;
-    public AtlasPathBuilder(AtlasAutoOp opMode, double x, double y, double r) {
+    double distancePerWaypoint;
+    public AtlasPathBuilder(AtlasAutoOp opMode, double x, double y, double r, double d) {
 
         this.opMode = opMode;
-
+        distancePerWaypoint = d;
         Node initial = new Node(x, y);
+        initial.zeroHandles();
         rotation = r;
         nodes.add(initial);
     }
 
     public void perform() {
         if (nodes.size() < 2) return;
+        debug("Starting performance");
         opMode.canSleep = false;
 
         opMode.telemetry.addLine(String.format("============= Atlas ============="));
@@ -48,13 +52,14 @@ public class AtlasPathBuilder {
             Node current = nodes.get(i);
             Node next = nodes.get(i + 1);
             Vector2 p0 = new Vector2(current.x, current.y);
-            Vector2 p1 = current.h2x == Double.MAX_VALUE ? p0 : new Vector2(current.x, current.y);
-            Vector2 p3 = new Vector2(current.x, current.y);
-            Vector2 p2 = next.h1x == Double.MAX_VALUE ? p3 : new Vector2(current.x, current.y);
-            ArrayList<Vector2> points = BezierUtils.sampleCubicBezier(p0, p1, p2, p3, 0.1);
-
-            if (current.r != Double.MAX_VALUE) {
-                rotationState = current.r;
+            Vector2 p1 = new Vector2(current.h2x, current.h2y);
+            Vector2 p3 = new Vector2(next.x, next.y);
+            Vector2 p2 = new Vector2(next.h1x, next.h1y);
+            AtlasPathBuilder.debug("Getting points from Bezier using", p0, p1, p2, p3, "and", distancePerWaypoint, "distance");
+            ArrayList<Vector2> points = BezierUtils.sampleCubicBezier(p0, p1, p2, p3, distancePerWaypoint);
+            AtlasPathBuilder.debug("Created a list of", points.size(), "waypoints and is now processing this");
+            if (next.r != Double.MAX_VALUE) {
+                rotationState = next.r;
             }
 
             boolean firstPoint = true;
@@ -76,6 +81,17 @@ public class AtlasPathBuilder {
             }
         }
         timer = System.currentTimeMillis() - timer;
+        debug(String.format("Created path with %s waypoints", waypoints.size()));
+        for (Waypoint waypoint : waypoints) {
+            int index = waypoints.indexOf(waypoint);
+            debug(String.format("%s: (%.2f, %.2f) r=%.2f", index, waypoint.x, waypoint.y, waypoint.r));
+        }
+        debug(String.format("From %s nodes", nodes.size()));
+        for (Node node : nodes) {
+            int index = nodes.indexOf(node);
+            debug(String.format("%s: (%.2f, %.2f) r=%.2f", index, node.x, node.y, node.r));
+        }
+        opMode.follower.run(waypoints);
         opMode.canSleep = true;
     }
 
@@ -89,6 +105,7 @@ public class AtlasPathBuilder {
         lastNode.x += x;
         lastNode.y += y;
         lastNode.moveSpeed = speed;
+        lastNode.zeroHandles();
         return this;
     }
     public AtlasPathBuilder andMoveTo(double x, double y) { return andMoveTo(x, y, 1); }
@@ -97,6 +114,7 @@ public class AtlasPathBuilder {
         lastNode.x = x;
         lastNode.y = y;
         lastNode.moveSpeed = speed;
+        lastNode.zeroHandles();
         return this;
     }
 
@@ -153,7 +171,8 @@ public class AtlasPathBuilder {
 
     public AtlasPathBuilder thenMove(double x, double y) { return thenMove(x, y, 1); }
     public AtlasPathBuilder thenMove(double x, double y, double speed) {
-        nodes.add(new Node(0, 0));
+        Node last = nodes.get(getEnd());
+        nodes.add(new Node(last.x, last.y));
         return andMove(x, y, speed);
     }
     public AtlasPathBuilder thenMoveTo(double x, double y) { return thenMoveTo(x, y, 1); }
@@ -200,5 +219,28 @@ public class AtlasPathBuilder {
 
         nodes.add(then);
         return this;
+    }
+
+    public AtlasPathBuilder thenSmoothMoveTo(double x, double y) { return thenSmoothMoveTo(x, y, 1.0); }
+    public AtlasPathBuilder thenSmoothMoveTo(double x, double y, double speed) { return thenSmoothMoveTo(x, y, speed, 1/6); }
+    public AtlasPathBuilder thenSmoothMoveTo(double x, double y, double speed, double tension) {
+        if (nodes.size() < 2) throw new IllegalStateException("Cannot smoothmove, not enough nodes to auto handle!");
+        Node left = nodes.get(getEnd() - 1);
+        Node middle = nodes.get(getEnd());
+        Node right = new Node(x, y);
+        nodes.add(right);
+
+        double tx = (right.x - left.x) * tension;
+        double ty = (right.y - left.y) * tension;
+        middle.h1x = middle.x - tx;
+        middle.h1y = middle.y - ty;
+        middle.h2x = middle.x + tx;
+        middle.h2y = middle.y + ty;
+        return this;
+    }
+
+    public static void debug(Object... args) {
+        String output = Arrays.stream(args).reduce((a, b) -> a + " " + b.toString()).get().toString();
+        System.out.println("[AtlasPathBuilder] " + output);
     }
 }
