@@ -28,6 +28,12 @@ public class AtlasPose {
                                int deltaBackLeft,
                                int deltaBackRight,
                                double yawRads) {
+        updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yawRads, false);
+    }
+
+    public void updateEncoders(int deltaFrontLeft, int deltaFrontRight,
+                               int deltaBackLeft, int deltaBackRight,
+                               double yawRads, boolean replay) {
         double dxLocal = (deltaFrontLeft + deltaFrontRight + deltaBackLeft + deltaBackRight) / 4.0;
         double dyLocal = (-deltaFrontLeft + deltaFrontRight + deltaBackLeft - deltaBackRight) / 4.0;
 
@@ -39,11 +45,16 @@ public class AtlasPose {
 
         long time = System.currentTimeMillis();
         pastStates.add(new PastState(time, dx, dy, x, y));
-
-        while (!pastStates.isEmpty() &&
-                time - pastStates.get(0).time > PAST_STATE_HOLD_TIME) {
-            pastStates.remove(0);
+        if (!replay) {
+            while (!pastStates.isEmpty() &&
+                    time - pastStates.get(0).time > PAST_STATE_HOLD_TIME) {
+                pastStates.remove(0);
+            }
         }
+    }
+
+    public void updateTruePosition(double x, double y, double time) {
+
     }
 
 //    public void updateLimelight(LLResult result) {

@@ -24,7 +24,7 @@ public class Chassis extends AtlasChassis {
                             RevHubOrientationOnRobot.LogoFacingDirection.UP,
                             RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                     ));
-            robotYawOffset = 45;
+            fieldRelativeOffset = 45;
             init(hardwareMap, xDriveConfig);
         } else {
             mecanumConfig.frontLeftName = "frontLeft";

@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Chassis;
+import org.firstinspires.ftc.teamcode.atlas.utils.Vector2;
 
 import static java.lang.Math.*;
 
@@ -90,6 +91,10 @@ public class AtlasChassis {
     }
 
     public void runToPosition(int x, int y) {
+        Vector2 vect = new Vector2(x, y);
+        vect.rotate(robotYawOffset);
+        x = (int) vect.x;
+        y = (int) vect.y;
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

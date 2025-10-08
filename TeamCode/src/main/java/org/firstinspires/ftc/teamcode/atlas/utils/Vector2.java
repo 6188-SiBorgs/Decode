@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.atlas.utils;
 
 public class Vector2 {
+    public static final double DEG_TO_RAD = Math.PI / 180d;
     public double x;
     public double y;
 
@@ -42,5 +43,15 @@ public class Vector2 {
 
     public String toString() {
         return String.format("(%.2f, %.2f)", x, y);
+    }
+
+    public void rotate(double degrees) {
+        rotateRads(degrees * DEG_TO_RAD);
+    }
+    public void rotateRads(double radians) {
+        double cs = Math.cos(radians);
+        double sn = Math.sin(radians);
+        x = x * cs - y * sn;
+        y = x * sn + y * cs;
     }
 }
