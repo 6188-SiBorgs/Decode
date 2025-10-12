@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.Chassis;
 public class Teleop extends LinearOpMode {
 
     public void runOpMode(){
-        Chassis chassis = new Chassis(hardwareMap);
         DcMotorEx right = hardwareMap.get(DcMotorEx.class, "right");
         DcMotorEx left = hardwareMap.get(DcMotorEx.class, "left");
         right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -28,8 +27,6 @@ public class Teleop extends LinearOpMode {
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
             double pa = gamepad1.right_stick_x;
-            chassis.update(telemetry);
-            chassis.moveFieldRelative(px, py, pa);
             if(gamepad1.right_bumper) {
                 right.setVelocity(2000);
                 left.setVelocity(2000);
