@@ -19,7 +19,7 @@ import static java.lang.Math.*;
 
 import java.lang.reflect.Parameter;
 
-public class AtlasChassis {
+public abstract class AtlasChassis {
     public DcMotorEx backLeft, backRight, frontLeft, frontRight;
     public IMU imu;
     public AtlasPose pose;
@@ -146,7 +146,7 @@ public class AtlasChassis {
         frontRightTicks = positions[3];
 
         pose.updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yawRads);
-
+        tick();
         if (telemetry != null) {
             telemetry.addLine("Chassis debug data:");
             telemetry.addLine("position (" + pose.x + ", " + pose.y + ")");
@@ -154,4 +154,6 @@ public class AtlasChassis {
         }
         return deltaTime;
     }
+
+    public abstract void tick();
 }
