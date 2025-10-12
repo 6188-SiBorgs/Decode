@@ -28,8 +28,8 @@ public class Teleop extends LinearOpMode {
             double py = -gamepad1.left_stick_y;
             double pa = gamepad1.right_stick_x;
             if(gamepad1.right_bumper) {
-                right.setVelocity(2000);
-                left.setVelocity(2000);
+                right.setVelocity(2800 * py);
+                left.setVelocity(2800 * py);
             } else {
                 right.setVelocity(0);
                 left.setVelocity(0);
