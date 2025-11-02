@@ -20,6 +20,9 @@ public class XDriveChassis extends AtlasChassis {
                         RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                         RevHubOrientationOnRobot.UsbFacingDirection.UP
                 ));
+        config.backRightIsReversed = true;
+        config.frontRightIsReversed = true;
+        config.frontLeftIsReversed = true;
         init(config);
     }
 
