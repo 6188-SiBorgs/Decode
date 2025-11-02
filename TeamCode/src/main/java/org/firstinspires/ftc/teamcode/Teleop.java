@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.utils.Chassis;
+import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -12,16 +14,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  *
  */
 
-@TeleOp(name = "Teleop", group = "MecanumBot")
+@TeleOp(name = "Teleop")
 public class Teleop extends OpMode {
     static final int maxRotationError = 1;
 
-    Chassis chassis;
+    XDriveChassis chassis;
     double targetAngle;
 
     @Override
     public void init() {
-        chassis = new Chassis(hardwareMap);
+        chassis = new XDriveChassis(this);
         targetAngle = chassis.yawDeg;
     }
 
