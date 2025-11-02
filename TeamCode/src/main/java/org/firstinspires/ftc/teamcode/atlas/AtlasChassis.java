@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.atlas;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -12,20 +13,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Chassis;
+import org.firstinspires.ftc.teamcode.atlas.utils.Vector2;
 
 import static java.lang.Math.*;
 
-import java.lang.reflect.Parameter;
-
-public class AtlasChassis {
+public abstract class AtlasChassis {
     public DcMotorEx backLeft, backRight, frontLeft, frontRight;
     public IMU imu;
     public AtlasPose pose;
 
     public double yawRads = 0.0;
     public double yawDeg = 0.0;
-    public double limeLightYawOffset = 0.0;
+    public double yawOffsetFromOrigin = 0.0;
     public double robotYawOffset = 0.0;
 
     public int backLeftTicks = 0;
@@ -42,11 +41,13 @@ public class AtlasChassis {
     public static final double DEG_TO_RAD = Math.PI / 180.0;
 
     private DcMotor.ZeroPowerBehavior zeroPowerBehavior;
-    public AtlasChassis() {
-
+    public OpMode opMode;
+    public AtlasChassis(OpMode opMode) {
+        this.opMode = opMode;
     }
 
-    public void init(HardwareMap hardwareMap, ChassisConfig config) {
+    public void init(ChassisConfig config) {
+        HardwareMap hardwareMap = opMode.hardwareMap;
         zeroPowerBehavior = config.zeroPowerBehavior;
         backLeft = getDcMotorEx(hardwareMap, config.backLeftName, config.backLeftIsReversed);
         backRight = getDcMotorEx(hardwareMap, config.backRightName, config.backRightIsReversed);
@@ -54,9 +55,9 @@ public class AtlasChassis {
         frontRight = getDcMotorEx(hardwareMap, config.frontRightName, config.frontRightIsReversed);
         // Make sure imu exists in hardware map
         imu = hardwareMap.get(IMU.class, "imu");
-
+        if (imu == null) throw new NullPointerException("IMU is null????");
         pose = new AtlasPose(metersPerTick);
-
+        if (config.imuParameters == null) throw new NullPointerException("IMU Paramters is null");
         imu.initialize(config.imuParameters);
         imu.resetYaw();
     }
@@ -90,6 +91,10 @@ public class AtlasChassis {
     }
 
     public void runToPosition(int x, int y) {
+        Vector2 vect = new Vector2(x, y);
+        vect.rotate(robotYawOffset);
+        x = (int) vect.x;
+        y = (int) vect.y;
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -140,13 +145,24 @@ public class AtlasChassis {
         frontLeftTicks = positions[2];
         frontRightTicks = positions[3];
 
-        pose.updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yawRads);
-
+        double yaw = ((yawOffsetFromOrigin - 90) * DEG_TO_RAD) + yawRads;
+        pose.updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yaw);
+        tick();
         if (telemetry != null) {
             telemetry.addLine("Chassis debug data:");
             telemetry.addLine("position (" + pose.x + ", " + pose.y + ")");
             telemetry.addLine("yaw " + yawDeg);
         }
         return deltaTime;
+    }
+
+    public abstract void tick();
+
+    public abstract void initLoop(OpMode opMode);
+
+    public void waitForStart(LinearOpMode opMode) {
+        while (opMode.opModeInInit()) {
+            initLoop(opMode);
+        }
     }
 }

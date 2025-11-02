@@ -24,6 +24,7 @@ public abstract class AtlasAutoOp extends LinearOpMode {
             telemetry.addLine(String.format("Atlas is ready! Waiting for start..."));
             telemetry.addLine(String.format("================================="));
             initLoop();
+            chassis.initLoop(this);
             telemetry.update();
         }
         waitForStart();
@@ -73,7 +74,7 @@ public abstract class AtlasAutoOp extends LinearOpMode {
     public void startAt(double x, double y, double yaw) {
         chassis.pose.x = x;
         chassis.pose.y = y;
-        chassis.limeLightYawOffset = yaw;
+        chassis.yawOffsetFromOrigin = yaw;
     }
     public void loop(Runnable func) {
         while (opModeIsActive()) {
