@@ -91,7 +91,7 @@ public abstract class AtlasAutoOp extends LinearOpMode {
         long startTime = System.currentTimeMillis();
         while (startTime + milliseconds < System.currentTimeMillis() && opModeIsActive()) {
             chassis.update();
-        }
+        } 
     }
 
 }
