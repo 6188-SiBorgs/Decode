@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.atlas.utils.Vector2;
 import org.firstinspires.ftc.teamcode.atlas.utils.Waypoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -34,6 +35,7 @@ public class AtlasFollower {
     boolean paused = false;
 
     public void run(ArrayList<Waypoint> waypoints) {
+        debug("Starting following with", waypoints.size(), "waypoints");
         boolean stopFunctionPassed = false;
         while (opMode.opModeIsActive()) {
             chassis.update(null);
@@ -52,6 +54,7 @@ public class AtlasFollower {
 
             if (waypoint.stop || currentWaypoint == waypoints.size() - 1) {
                 if (distanceToTarget < stopTolerance && abs(getRotationAngle(waypoint.r, chassis.yawDeg)) < 1) {
+                    debug("Completed stop", currentWaypoint);
                     chassis.movePower(0.0, 0.0, 0.0);
                     currentWaypoint += 1;
                     if (currentWaypoint == waypoints.size()) break;
@@ -65,13 +68,16 @@ public class AtlasFollower {
                 }
             } else {
                 while (distanceToTarget < tolerance && !waypoint.stop && opMode.opModeIsActive()) {
+                    debug("Completed waypoint", currentWaypoint, "at", waypoint.x, waypoint.y, "Robot is at", chassis.pose);
                     currentWaypoint += 1;
+                    if (currentWaypoint == waypoints.size()) break;
                     waypoint = waypoints.get(currentWaypoint);
                     distanceToTarget = distance(waypoint.x, waypoint.y,chassis.pose.x, chassis.pose.y);
                     for (Runnable func : waypoint.onStart) {
                         func.run();
                     }
                 }
+                if (currentWaypoint == waypoints.size()) break;
                 if (waypoint.stop) {
                     continue;
                 }
@@ -114,9 +120,9 @@ public class AtlasFollower {
             double dr = rotationTargetValue(waypoint.r, chassis.yawDeg);
 
             chassis.moveFieldRelative(
-                    clamp(dx, -1.0, 1.0),
-                    clamp(dy, -1.0, 1.0),
-                    dr
+                    clamp(dx, -1.0, 1.0) * waypoint.moveSpeed,
+                    clamp(dy, -1.0, 1.0) * waypoint.moveSpeed,
+                    dr * waypoint.rotSpeed
             );
 
             telemetry.update();
@@ -133,7 +139,7 @@ public class AtlasFollower {
         if (-tolerance < value && value < tolerance) {
             return value * 0.01;
         }
-        return value * 0.25;
+        return value * 0.1;
     }
 
     private double rotationTargetValue(double target, double current) {
@@ -148,5 +154,9 @@ public class AtlasFollower {
 
     private double clamp(double value, double min, double max) {
         return max(min, min(value, max));
+    }
+    public static void debug(Object... args) {
+        String output = Arrays.stream(args).reduce((a, b) -> a + " " + b.toString()).get().toString();
+        System.out.println("[AtlasFollower] " + output);
     }
 }

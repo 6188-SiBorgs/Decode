@@ -6,9 +6,11 @@ public class AtlasParameters {
     public double tolerance;
     public double stopTolerance;
 
-    public AtlasParameters(AtlasChassis chassis, double tolerance, double stopTolerance) {
+    public double distancePerWaypoint;
+    public AtlasParameters(AtlasChassis chassis, double tolerance, double stopTolerance, double distancePerWaypoint) {
         this.chassis = chassis;
         this.tolerance = tolerance;
         this.stopTolerance = stopTolerance;
+        this.distancePerWaypoint = distancePerWaypoint;
     }
 }

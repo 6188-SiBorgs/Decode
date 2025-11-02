@@ -8,10 +8,10 @@ public abstract class AtlasAutoOp extends LinearOpMode {
     public AtlasFollower follower;
 
     public boolean canSleep = true;
-
+    AtlasParameters parameters;
     @Override
     public void runOpMode() {
-        AtlasParameters parameters = create();
+        parameters = create();
         if (parameters == null) {
             throw new NullPointerException("AtlasAuto create() method must return an AtlasParameters object");
         }
@@ -24,10 +24,14 @@ public abstract class AtlasAutoOp extends LinearOpMode {
             telemetry.addLine(String.format("Atlas is ready! Waiting for start..."));
             telemetry.addLine(String.format("================================="));
             initLoop();
+            chassis.initLoop(this);
             telemetry.update();
         }
-
         waitForStart();
+        chassis.update(null);
+        chassis.pose.x = 0;
+        chassis.pose.y = 0;
+        chassis.imu.resetYaw();
         perform();
         chassis.movePower(0, 0, 0);
         while (opModeIsActive()) {
@@ -45,7 +49,7 @@ public abstract class AtlasAutoOp extends LinearOpMode {
     void tickLoop() {}
 
     public AtlasPathBuilder startPath() {
-        return new AtlasPathBuilder(this, chassis.pose.x, chassis.pose.y, chassis.yawDeg);
+        return new AtlasPathBuilder(this, chassis.pose.x, chassis.pose.y, chassis.yawDeg, parameters.distancePerWaypoint);
     }
     public AtlasPathBuilder move(double x, double y) { return move(x, y, 1); }
     public AtlasPathBuilder move(double x, double y, double speed) { return moveTo(chassis.pose.x + x, chassis.pose.y + y, speed); }
@@ -59,6 +63,18 @@ public abstract class AtlasAutoOp extends LinearOpMode {
     public AtlasPathBuilder rotateTo(double degrees) { return rotateTo(degrees, 1); }
     public AtlasPathBuilder rotateTo(double degrees, double speed) {
         return startPath().andRotateTo(degrees);
+    }
+
+    public AtlasPathBuilder moveBezier(double x, double y, double h1x, double h1y, double h2x, double h2y) {return moveBezier(x, y, h1x, h1y, h2x, h2y, 1.0);}
+    public AtlasPathBuilder moveBezier(double x, double y, double h1x, double h1y, double h2x, double h2y, double speed) {
+        return startPath().thenBezierTo(x, y, h1x, h2y, h2x, h2y, speed);
+    }
+
+    public void startAt(double x, double y) { startAt(x, y, 0); }
+    public void startAt(double x, double y, double yaw) {
+        chassis.pose.x = x;
+        chassis.pose.y = y;
+        chassis.yawOffsetFromOrigin = yaw;
     }
     public void loop(Runnable func) {
         while (opModeIsActive()) {
