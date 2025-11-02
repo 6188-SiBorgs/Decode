@@ -5,6 +5,12 @@ import java.util.List;
 
 import static java.lang.Math.*;
 
+import android.annotation.SuppressLint;
+
+import androidx.annotation.NonNull;
+
+import com.qualcomm.robotcore.util.Range;
+
 public class AtlasPose {
     private final double metersPerTick;
 
@@ -23,17 +29,9 @@ public class AtlasPose {
         this.metersPerTick = metersPerTick;
     }
 
-    public void updateEncoders(int deltaFrontLeft,
-                               int deltaFrontRight,
-                               int deltaBackLeft,
-                               int deltaBackRight,
-                               double yawRads) {
-        updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yawRads, false);
-    }
-
     public void updateEncoders(int deltaFrontLeft, int deltaFrontRight,
                                int deltaBackLeft, int deltaBackRight,
-                               double yawRads, boolean replay) {
+                               double yawRads) {
         double dxLocal = (deltaFrontLeft + deltaFrontRight + deltaBackLeft + deltaBackRight) / 4.0;
         double dyLocal = (-deltaFrontLeft + deltaFrontRight + deltaBackLeft - deltaBackRight) / 4.0;
 
@@ -45,31 +43,33 @@ public class AtlasPose {
 
         long time = System.currentTimeMillis();
         pastStates.add(new PastState(time, dx, dy, x, y));
-        if (!replay) {
-            while (!pastStates.isEmpty() &&
-                    time - pastStates.get(0).time > PAST_STATE_HOLD_TIME) {
-                pastStates.remove(0);
+        while (!pastStates.isEmpty() &&
+                time - pastStates.get(0).time > PAST_STATE_HOLD_TIME) {
+            pastStates.remove(0);
+        }
+    }
+
+    public void updateTruePosition(double x, double y, double time, double confidence) {
+        confidence = Range.clip(confidence, -1, 1);
+        double inverseConfidence = 1 - confidence;
+        this.x = this.x * inverseConfidence + x * confidence;
+        this.y = this.y * inverseConfidence + y * confidence;
+
+        for (int i = pastStates.size() - 1; i >= 0; i--) {
+            PastState state = pastStates.get(i);
+            if (state.time > time) {
+                x -= state.dx * metersPerTick;
+                y += state.dy * metersPerTick;
             }
         }
     }
 
     public void updateTruePosition(double x, double y, double time) {
-
+        updateTruePosition(x, y, time, 1);
     }
 
-//    public void updateLimelight(LLResult result) {
-//        if (result == null) return;
-//        Position mt2 = result.getBotpose_MT2().getPosition();
-//        limelightX = mt2.getX();
-//        limelightY = mt2.getY();
-//        limelightT = mt2.getAcquisitionTime();
-//
-//        double k = visionConfidence * (processNoise / (processNoise + visionNoise));
-//
-//        x = (1 - k) * pose.x + k * visionPose.x;
-//        y = (1 - k) * pose.y + k * visionPose.y;
-//    }
-
+    @SuppressLint("DefaultLocale")
+    @NonNull
     public String toString() {
         return String.format("<AtlasPose %.2f, %.2f>", x, y);
     }

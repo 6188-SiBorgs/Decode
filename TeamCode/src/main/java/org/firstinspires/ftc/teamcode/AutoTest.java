@@ -4,12 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasAutoOp;
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasParameters;
+import org.firstinspires.ftc.teamcode.utils.Chassis;
 
 @TeleOp(name="AutoTestSilly")
 public class AutoTest extends AtlasAutoOp {
     @Override
     public AtlasParameters create() {
-        Chassis chassis = new Chassis(hardwareMap);
+        Chassis chassis = new Chassis(this);
         return new AtlasParameters(chassis, 0.02, 0.01, 0.05);
     }
 
