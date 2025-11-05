@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Teleop")
 public class Teleop extends OpMode {
@@ -41,13 +42,15 @@ public class Teleop extends OpMode {
 
         double multiplier = Math.pow(2 * gamepad1.left_trigger, 2)  + 1;
 
-        if (gamepad1.dpad_up) {
+        if (gamepad1.dpad_up && launcherSpeed <= 2800) {
             launcherSpeed += (int) (50 * multiplier);
         }
 
-        if (gamepad1.dpad_down) {
+        if (gamepad1.dpad_down && launcherSpeed >= 20) {
             launcherSpeed += (int) (50 * multiplier);
         }
+
+        launcherSpeed = Range.clip(launcherSpeed, 20, 2800);
 
         if (gamepad1.right_bumper) {
             launching = !launching;
