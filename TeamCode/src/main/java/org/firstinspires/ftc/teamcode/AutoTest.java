@@ -17,7 +17,7 @@ public class AutoTest extends AtlasAutoOp {
 
     @Override
     public void perform() {
-        double speed = 0.3;
+        double speed = 0.3  ;
         double tension = 0.05;
         moveTo(-0.6, 0.3).andRotateTo(-90)
             .thenSmoothMoveTo(0, 0.6, speed, tension)

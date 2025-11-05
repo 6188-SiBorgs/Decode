@@ -116,6 +116,7 @@ public abstract class AtlasChassis {
     public double update(Telemetry telemetry) {
         long currentTime = System.currentTimeMillis();
         double deltaTimeMS = currentTime - lastUpdateTime;
+        if (deltaTimeMS == 0) deltaTimeMS = 0.1;
         double deltaTime = deltaTimeMS * 0.001;
         lastUpdateTime = currentTime;
 
@@ -127,6 +128,10 @@ public abstract class AtlasChassis {
 
         yawRads = orientation.firstAngle + robotYawOffset * DEG_TO_RAD;
         yawDeg = orientation.firstAngle * RAD_TO_DEG + robotYawOffset;
+
+        if (Double.isNaN(yawRads) || Double.isNaN(yawDeg) || Double.isInfinite(yawRads) || Double.isInfinite(yawDeg)) {
+            throw new RuntimeException("i fucking hate the imu so much");
+        }
 
         int[] positions = new int[]{
                 backLeft.getCurrentPosition(),
@@ -147,6 +152,9 @@ public abstract class AtlasChassis {
 
         double yaw = ((yawOffsetFromOrigin - 90) * DEG_TO_RAD) + yawRads;
         pose.updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yaw);
+        if (Double.isNaN(pose.x) || Double.isNaN(pose.y) || Double.isInfinite(pose.x) || Double.isInfinite(pose.y)) {
+            throw new RuntimeException("i fucking hate the imu so much");
+        }
         tick();
         if (telemetry != null) {
             telemetry.addLine("Chassis debug data:");
