@@ -1,29 +1,34 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.utils.Chassis;
 import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-/**
- * Example OpMode. Demonstrates use of gyro, color sensor, encoders, and telemetry.
- *
- */
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp(name = "Teleop")
 public class Teleop extends OpMode {
     static final int maxRotationError = 1;
 
     XDriveChassis chassis;
+    DcMotorEx launcherMotor1, launcherMotor2;
     double targetAngle;
+
+    int launcherSpeed = 2000;
+    boolean launching = false;
 
     @Override
     public void init() {
         chassis = new XDriveChassis(this);
+
+        launcherMotor1 = hardwareMap.get(DcMotorEx.class, "launcher1");
+        launcherMotor2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+
+        launcherMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         targetAngle = chassis.yawDeg;
     }
 
@@ -33,6 +38,28 @@ public class Teleop extends OpMode {
         double leftStickY = -gamepad1.left_stick_y;
         double rightStickX = gamepad1.right_stick_x;
         double rotationMovement = rightStickX;
+
+        double multiplier = Math.pow(2 * gamepad1.left_trigger, 2)  + 1;
+
+        if (gamepad1.dpad_up) {
+            launcherSpeed += (int) (50 * multiplier);
+        }
+
+        if (gamepad1.dpad_down) {
+            launcherSpeed += (int) (50 * multiplier);
+        }
+
+        if (gamepad1.right_bumper) {
+            launching = !launching;
+        }
+
+        launcherMotor1.setVelocity(launching ? launcherSpeed * gamepad1.right_trigger : 0);
+        launcherMotor2.setVelocity(launching ? launcherSpeed * gamepad1.right_trigger : 0);
+
+        telemetry.addLine("Launcher");
+        telemetry.addData("Launching", launching);
+        telemetry.addData("Launch Speed", launcherSpeed);
+        telemetry.addLine();
 
         chassis.update(telemetry);
 
