@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.utils.Chassis;
 import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
-
-@TeleOp(name = ".XDriveTeleop", group = "XDrive ")
+@Disabled
+@TeleOp(name = ".XDriveTeleop", group = "XDrive")
 public class XDriveTeleop extends LinearOpMode {
     public void runOpMode() {
         XDriveChassis chassis = new XDriveChassis(this);

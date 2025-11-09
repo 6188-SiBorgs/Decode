@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasAutoOp;
@@ -7,6 +8,7 @@ import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasParameters;
 import org.firstinspires.ftc.teamcode.utils.Chassis;
 import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 
+@Disabled
 @TeleOp(name="AutoTestSilly")
 public class AutoTest extends AtlasAutoOp {
     @Override

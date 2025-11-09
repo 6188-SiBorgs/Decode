@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasAutoOp;
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasParameters;
 import org.firstinspires.ftc.teamcode.utils.Chassis;
 
+@Disabled
 @TeleOp(name="LimelihghtAutoTest")
 public class LimelightAutoTest extends AtlasAutoOp {
     @Override

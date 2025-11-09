@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 // Right Trigger: Rotate shooter speed
 // A: Intake
 
-@TeleOp(name="Teleop")
-public class Teleop extends LinearOpMode {
+@TeleOp(name="Teleop (for broken robot)")
+public class TeleopDIffPower extends LinearOpMode {
     private static final int LAUNCHER_SPEED = 1350;
 
     private DcMotorEx launcherLeft;
@@ -108,7 +108,7 @@ public class Teleop extends LinearOpMode {
                     rotationPower = Math.max(-1.0, Math.min(-angleError / 45.0, 1.0));
                 }
             }
-            chassis.moveFieldRelative(leftStickX, leftStickY, rotationPower);
+            chassis.moveFieldRelativeDegraded(leftStickX, leftStickY, rotationPower);
             telemetry.update();
         }
     }
