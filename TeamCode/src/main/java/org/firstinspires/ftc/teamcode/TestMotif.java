@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.utils.Chassis;
 import org.firstinspires.ftc.teamcode.utils.Motifs;
-
+@Disabled
 @TeleOp(name="TestMotif")
 public class TestMotif extends LinearOpMode {
 

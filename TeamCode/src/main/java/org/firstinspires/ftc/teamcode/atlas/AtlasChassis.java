@@ -90,6 +90,30 @@ public abstract class AtlasChassis {
         backRight.setPower((y + x - r) / denominator);
     }
 
+
+    public void moveFieldRelativeDegraded(double x, double y, double rx) {
+        double yaw = yawRads + fieldRelativeOffset;
+        double rotatedX = x * Math.cos(-yaw) - y * Math.sin(-yaw);
+        double rotatedY = x * Math.sin(-yaw) + y * Math.cos(-yaw);
+        movePower(rotatedX, rotatedY, rx);
+    }
+
+    public void movePowerDegraded(double x, double y, double r) {
+        // Compute powers for the three working wheels (frontRight is broken)
+        double fl =  2*x + 2*r;
+        double bl =  2*y - 2*x;
+        double br =  2*y - 2*r;
+
+        // Normalize to [-1, 1] while preserving direction ratios
+        double denom = Math.max(1.0, Math.max(Math.abs(fl), Math.max(Math.abs(bl), Math.abs(br))));
+
+        frontLeft.setPower(fl / denom);
+        backLeft.setPower(bl / denom);
+        frontRight.setPower(0);        // broken
+        backRight.setPower(br / denom);
+    }
+
+
     public void runToPosition(int x, int y) {
         Vector2 vect = new Vector2(x, y);
         vect.rotate(robotYawOffset);
@@ -107,7 +131,8 @@ public abstract class AtlasChassis {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        movePower(x, y, 0);
+        Vector2 normalized = vect.normalized();
+        movePower(normalized.x * 0.5, normalized.y * 0.5, 0);
     }
 
     public double update() {
@@ -116,6 +141,7 @@ public abstract class AtlasChassis {
     public double update(Telemetry telemetry) {
         long currentTime = System.currentTimeMillis();
         double deltaTimeMS = currentTime - lastUpdateTime;
+        if (deltaTimeMS == 0) deltaTimeMS = 0.1;
         double deltaTime = deltaTimeMS * 0.001;
         lastUpdateTime = currentTime;
 
@@ -127,6 +153,10 @@ public abstract class AtlasChassis {
 
         yawRads = orientation.firstAngle + robotYawOffset * DEG_TO_RAD;
         yawDeg = orientation.firstAngle * RAD_TO_DEG + robotYawOffset;
+
+        if (Double.isNaN(yawRads) || Double.isNaN(yawDeg) || Double.isInfinite(yawRads) || Double.isInfinite(yawDeg)) {
+            throw new RuntimeException("i fucking hate the imu so much");
+        }
 
         int[] positions = new int[]{
                 backLeft.getCurrentPosition(),
@@ -147,6 +177,9 @@ public abstract class AtlasChassis {
 
         double yaw = ((yawOffsetFromOrigin - 90) * DEG_TO_RAD) + yawRads;
         pose.updateEncoders(deltaFrontLeft, deltaFrontRight, deltaBackLeft, deltaBackRight, yaw);
+        if (Double.isNaN(pose.x) || Double.isNaN(pose.y) || Double.isInfinite(pose.x) || Double.isInfinite(pose.y)) {
+            throw new RuntimeException("i fucking hate the imu so much");
+        }
         tick();
         if (telemetry != null) {
             telemetry.addLine("Chassis debug data:");
