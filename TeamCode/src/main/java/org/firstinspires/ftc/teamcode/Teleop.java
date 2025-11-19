@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
+import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 // Controls:
 // Left Stick: Movement
 // Right stick: Rotation
@@ -17,20 +17,22 @@ import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 @TeleOp(name="Teleop")
 public class Teleop extends LinearOpMode {
     private static final int LAUNCHER_SPEED = 1350;
+    public static final int INTAKE_TIME = 500;
+    public static final int LAUNCH_TIME = 1000;
+    public static final int TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING = 50;
 
     private DcMotorEx launcherLeft;
     private DcMotorEx launcherRight;
 
     double maxRotationError = 1;
     boolean launchServoUp = false;
-    boolean leftBumperToggle = false;
     long intakeTimer = 0L;
     long launchTimer = 0L;
     long rotationTimer = 0L;
 
     @Override
     public void runOpMode() {
-        XDriveChassis chassis = new XDriveChassis(this);
+        MecanumChassis chassis = new MecanumChassis(this);
 
         launcherLeft = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherLeft");
         launcherRight = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherRight");
@@ -52,24 +54,21 @@ public class Teleop extends LinearOpMode {
             rightStickX = Math.copySign(Math.pow(rightStickX, 2), rightStickX);
             double rotationPower = rightStickX;
 
-            if (gamepad1.left_bumper) {
-                if (!leftBumperToggle) launchServoUp = !launchServoUp;
-                leftBumperToggle = true;
+            if (gamepad1.leftBumperWasPressed()) {
+                launchServoUp = !launchServoUp;
                 launchTimer = 0;
-            } else leftBumperToggle = false;
+            }
 
             if (gamepad1.a && intakeTimer == 0) {
                 intakeTimer = System.currentTimeMillis();
                 launchServoUp = false;
                 resetLaunchMotors();
-                launcherLeft.setVelocity(1000);
                 launcherRight.setVelocity(1000);
             }
 
-            if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > 500) {
+            if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > INTAKE_TIME) {
                 intakeTimer = 0;
                 resetLaunchMotors();
-                launcherLeft.setVelocity(0);
                 launcherRight.setVelocity(0);
             }
 
@@ -78,14 +77,14 @@ public class Teleop extends LinearOpMode {
             if (intakeTimer == 0) {
                 launcherLeft.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
                 launcherRight.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
-                double velocity = (launcherLeft.getVelocity() + launcherRight.getVelocity()) * 0.5;
-                if (velocity > 1350) {
+                double velocity = Math.min(launcherLeft.getVelocity(), launcherRight.getVelocity());
+                if (velocity > LAUNCHER_SPEED) {
                     launchServoUp = true;
                     launchTimer = System.currentTimeMillis();
                 }
             }
 
-            if (launchTimer != 0 && System.currentTimeMillis() - launchTimer > 1000) {
+            if (launchTimer != 0 && System.currentTimeMillis() - launchTimer > LAUNCH_TIME) {
                 launchTimer = 0;
                 launchServoUp = false;
             }
@@ -102,7 +101,7 @@ public class Teleop extends LinearOpMode {
             if (rightStickX != 0) {
                 targetAngle = chassis.yawDeg;
                 rotationTimer = System.currentTimeMillis();
-            } else if (System.currentTimeMillis() - rotationTimer > 50) {
+            } else if (System.currentTimeMillis() - rotationTimer > TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING) {
                 double angleError = getNormalizedAngle(targetAngle - chassis.yawDeg);
                 if (Math.abs(angleError) > maxRotationError) {
                     rotationPower = Math.max(-1.0, Math.min(-angleError / 45.0, 1.0));
