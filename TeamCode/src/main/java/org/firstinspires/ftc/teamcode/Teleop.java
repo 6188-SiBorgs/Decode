@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 // Controls:
@@ -21,56 +24,65 @@ public class Teleop extends LinearOpMode {
     private DcMotorEx launcherLeft;
     private DcMotorEx launcherRight;
 
-    double maxRotationError = 1;
-    boolean launchServoUp = false;
-    boolean leftBumperToggle = false;
-    long intakeTimer = 0L;
-    long launchTimer = 0L;
-    long rotationTimer = 0L;
+    XDriveChassis chassis;
+    DcMotorEx launcherMotor1, launcherMotor2;
+    double targetAngle;
+
+    int launcherSpeed = 2000;
+    boolean launching = false;
 
     @Override
-    public void runOpMode() {
-        XDriveChassis chassis = new XDriveChassis(this);
+    public void init() {
+        chassis = new XDriveChassis(this);
 
-        launcherLeft = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherLeft");
-        launcherRight = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherRight");
-        Servo launchServo = hardwareMap.get(Servo.class, "launchServo");
+        launcherMotor1 = hardwareMap.get(DcMotorEx.class, "launcher1");
+        launcherMotor2 = hardwareMap.get(DcMotorEx.class, "launcher2");
 
-        launcherLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcherRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcherMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        chassis.waitForStart(this);
-        chassis.imu.resetYaw();
-        double targetAngle = 0;
+        targetAngle = chassis.yawDeg;
+    }
 
-        while (opModeIsActive()) {
-            double leftStickX = gamepad1.left_stick_x;
-            double leftStickY = -gamepad1.left_stick_y;
-            double rightStickX = gamepad1.right_stick_x;
-            rightStickX = Math.copySign(Math.pow(rightStickX, 2), rightStickX);
-            double rotationPower = rightStickX;
+    @Override
+    public void loop() {
+        double leftStickX = gamepad1.left_stick_x;
+        double leftStickY = -gamepad1.left_stick_y;
+        double rightStickX = gamepad1.right_stick_x;
+        double rotationMovement = rightStickX;
 
-            if (gamepad1.left_bumper) {
-                if (!leftBumperToggle) launchServoUp = !launchServoUp;
-                leftBumperToggle = true;
-                launchTimer = 0;
-            } else leftBumperToggle = false;
+        double multiplier = Math.pow(2 * gamepad1.left_trigger, 2)  + 1;
 
-            if (gamepad1.a && intakeTimer == 0) {
-                intakeTimer = System.currentTimeMillis();
-                launchServoUp = false;
-                resetLaunchMotors();
-                launcherLeft.setVelocity(1000);
-                launcherRight.setVelocity(1000);
-            }
+        if (gamepad1.dpad_up && launcherSpeed <= 2800) {
+            launcherSpeed += (int) (50 * multiplier);
+        }
 
-            if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > 500) {
-                intakeTimer = 0;
-                resetLaunchMotors();
-                launcherLeft.setVelocity(0);
-                launcherRight.setVelocity(0);
+        if (gamepad1.dpad_down && launcherSpeed >= 20) {
+            launcherSpeed += (int) (50 * multiplier);
+        }
+
+        launcherSpeed = Range.clip(launcherSpeed, 20, 2800);
+
+        if (gamepad1.right_bumper) {
+            launching = !launching;
+        }
+
+        launcherMotor1.setVelocity(launching ? launcherSpeed * gamepad1.right_trigger : 0);
+        launcherMotor2.setVelocity(launching ? launcherSpeed * gamepad1.right_trigger : 0);
+
+        telemetry.addLine("Launcher");
+        telemetry.addData("Launching", launching);
+        telemetry.addData("Launch Speed", launcherSpeed);
+        telemetry.addLine();
+
+        chassis.update(telemetry);
+
+        if (rightStickX != 0) {
+            targetAngle = chassis.yawDeg;
+        } else {
+            double angleError = getNormalizedAngle(targetAngle - chassis.yawDeg);
+            if (Math.abs(angleError) > maxRotationError) {
+                rotationMovement = Math.max(-1.0, Math.min(-angleError / 45.0, 1.0));
             }
 
             launchServo.setPosition(launchServoUp ? 0.6 : 0.43);
