@@ -72,7 +72,8 @@ public class Teleop extends LinearOpMode {
                 launcherRight.setVelocity(0);
             }
 
-            launchServo.setPosition(launchServoUp ? 0.6 : 0.43);
+            launchServo.setPosition(launchServoUp ? 0.75 : 0.55);
+            telemetry.addData("Servo Position", launchServo.getPosition());
 
             if (intakeTimer == 0) {
                 launcherLeft.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
