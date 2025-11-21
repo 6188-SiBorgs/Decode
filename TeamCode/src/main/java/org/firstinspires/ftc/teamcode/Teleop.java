@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
+import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 // Controls:
 // Left Stick: Movement
 // Right stick: Rotation
@@ -20,69 +17,59 @@ import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 @TeleOp(name="Teleop")
 public class Teleop extends LinearOpMode {
     private static final int LAUNCHER_SPEED = 1350;
+    public static final int INTAKE_TIME = 500;
+    public static final int LAUNCH_TIME = 1000;
+    public static final int TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING = 50;
 
     private DcMotorEx launcherLeft;
     private DcMotorEx launcherRight;
 
-    XDriveChassis chassis;
-    DcMotorEx launcherMotor1, launcherMotor2;
-    double targetAngle;
-
-    int launcherSpeed = 2000;
-    boolean launching = false;
-
-    @Override
-    public void init() {
-        chassis = new XDriveChassis(this);
-
-        launcherMotor1 = hardwareMap.get(DcMotorEx.class, "launcher1");
-        launcherMotor2 = hardwareMap.get(DcMotorEx.class, "launcher2");
-
-        launcherMotor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        launcherMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
-        targetAngle = chassis.yawDeg;
-    }
+    double maxRotationError = 1;
+    boolean launchServoUp = false;
+    long intakeTimer = 0L;
+    long launchTimer = 0L;
+    long rotationTimer = 0L;
 
     @Override
-    public void loop() {
-        double leftStickX = gamepad1.left_stick_x;
-        double leftStickY = -gamepad1.left_stick_y;
-        double rightStickX = gamepad1.right_stick_x;
-        double rotationMovement = rightStickX;
+    public void runOpMode() {
+        MecanumChassis chassis = new MecanumChassis(this);
 
-        double multiplier = Math.pow(2 * gamepad1.left_trigger, 2)  + 1;
+        launcherLeft = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherLeft");
+        launcherRight = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherRight");
+        Servo launchServo = hardwareMap.get(Servo.class, "launchServo");
 
-        if (gamepad1.dpad_up && launcherSpeed <= 2800) {
-            launcherSpeed += (int) (50 * multiplier);
-        }
+        launcherLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcherRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        if (gamepad1.dpad_down && launcherSpeed >= 20) {
-            launcherSpeed += (int) (50 * multiplier);
-        }
+        chassis.waitForStart(this);
+        chassis.imu.resetYaw();
+        double targetAngle = 0;
 
-        launcherSpeed = Range.clip(launcherSpeed, 20, 2800);
+        while (opModeIsActive()) {
+            double leftStickX = gamepad1.left_stick_x;
+            double leftStickY = -gamepad1.left_stick_y;
+            double rightStickX = gamepad1.right_stick_x;
+            rightStickX = Math.copySign(Math.pow(rightStickX, 2), rightStickX);
+            double rotationPower = rightStickX;
 
-        if (gamepad1.right_bumper) {
-            launching = !launching;
-        }
+            if (gamepad1.leftBumperWasPressed()) {
+                launchServoUp = !launchServoUp;
+                launchTimer = 0;
+            }
 
-        launcherMotor1.setVelocity(launching ? launcherSpeed * gamepad1.right_trigger : 0);
-        launcherMotor2.setVelocity(launching ? launcherSpeed * gamepad1.right_trigger : 0);
+            if (gamepad1.a && intakeTimer == 0) {
+                intakeTimer = System.currentTimeMillis();
+                launchServoUp = false;
+                resetLaunchMotors();
+                launcherRight.setVelocity(1000);
+            }
 
-        telemetry.addLine("Launcher");
-        telemetry.addData("Launching", launching);
-        telemetry.addData("Launch Speed", launcherSpeed);
-        telemetry.addLine();
-
-        chassis.update(telemetry);
-
-        if (rightStickX != 0) {
-            targetAngle = chassis.yawDeg;
-        } else {
-            double angleError = getNormalizedAngle(targetAngle - chassis.yawDeg);
-            if (Math.abs(angleError) > maxRotationError) {
-                rotationMovement = Math.max(-1.0, Math.min(-angleError / 45.0, 1.0));
+            if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > INTAKE_TIME) {
+                intakeTimer = 0;
+                resetLaunchMotors();
+                launcherRight.setVelocity(0);
             }
 
             launchServo.setPosition(launchServoUp ? 0.6 : 0.43);
@@ -90,14 +77,14 @@ public class Teleop extends LinearOpMode {
             if (intakeTimer == 0) {
                 launcherLeft.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
                 launcherRight.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
-                double velocity = (launcherLeft.getVelocity() + launcherRight.getVelocity()) * 0.5;
-                if (velocity > 1350) {
+                double velocity = Math.min(launcherLeft.getVelocity(), launcherRight.getVelocity());
+                if (velocity > LAUNCHER_SPEED) {
                     launchServoUp = true;
                     launchTimer = System.currentTimeMillis();
                 }
             }
 
-            if (launchTimer != 0 && System.currentTimeMillis() - launchTimer > 1000) {
+            if (launchTimer != 0 && System.currentTimeMillis() - launchTimer > LAUNCH_TIME) {
                 launchTimer = 0;
                 launchServoUp = false;
             }
@@ -114,7 +101,7 @@ public class Teleop extends LinearOpMode {
             if (rightStickX != 0) {
                 targetAngle = chassis.yawDeg;
                 rotationTimer = System.currentTimeMillis();
-            } else if (System.currentTimeMillis() - rotationTimer > 50) {
+            } else if (System.currentTimeMillis() - rotationTimer > TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING) {
                 double angleError = getNormalizedAngle(targetAngle - chassis.yawDeg);
                 if (Math.abs(angleError) > maxRotationError) {
                     rotationPower = Math.max(-1.0, Math.min(-angleError / 45.0, 1.0));
