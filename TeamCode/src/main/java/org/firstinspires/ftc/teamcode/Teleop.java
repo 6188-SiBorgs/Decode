@@ -63,7 +63,7 @@ public class Teleop extends LinearOpMode {
                 intakeTimer = System.currentTimeMillis();
                 launchServoUp = false;
                 resetLaunchMotors();
-                launcherRight.setVelocity(1000);
+                launcherRight.setVelocity(-1000);
             }
 
             if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > INTAKE_TIME) {
@@ -76,9 +76,10 @@ public class Teleop extends LinearOpMode {
 
             if (intakeTimer == 0) {
                 launcherLeft.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
-                launcherRight.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
+                launcherRight.setVelocity(-LAUNCHER_SPEED * gamepad1.right_trigger);
                 double velocity = Math.min(launcherLeft.getVelocity(), launcherRight.getVelocity());
                 if (velocity > LAUNCHER_SPEED) {
+
                     launchServoUp = true;
                     launchTimer = System.currentTimeMillis();
                 }

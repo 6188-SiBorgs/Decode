@@ -20,6 +20,9 @@ public class MecanumChassis extends AtlasChassis {
                         RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                         RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
                 ));
+        config.backLeftIsReversed = true;
+        config.frontLeftIsReversed = false;
+        config.backRightIsReversed = true;
         init(config);
     }
 
