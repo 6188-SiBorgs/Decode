@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 // Left Bumper: Shoot
 // Right Trigger: Rotate shooter speed
 // A: Intake
+// Down Arrow: Spit out
 
 @TeleOp(name="Teleop")
 public class Teleop extends LinearOpMode {
@@ -59,11 +60,11 @@ public class Teleop extends LinearOpMode {
                 launchTimer = 0;
             }
 
-            if (gamepad1.a && intakeTimer == 0) {
+            if ((gamepad1.a || gamepad1.dpad_down) && intakeTimer == 0) {
                 intakeTimer = System.currentTimeMillis();
                 launchServoUp = false;
                 resetLaunchMotors();
-                launcherRight.setVelocity(-1000);
+                launcherRight.setVelocity(1000 * (gamepad1.a ? -1 : 1));
             }
 
             if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > INTAKE_TIME) {
