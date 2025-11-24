@@ -15,9 +15,18 @@ import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 // A: Intake
 // Down Arrow: Spit out
 
+/*
+Dark mode
+More gradients (ultra modern fancy super cool)
+Fix the breakdown graph and round numbers to make it more appealing
+Make it way fancier and professional
+ */
+
 @TeleOp(name="Teleop")
 public class Teleop extends LinearOpMode {
-    private static final int LAUNCHER_SPEED = 1350;
+    private static final double LAUNCHER_SPEED_MULTIPLIER = 0.8;
+    private static final int LAUNCHER_SPEED_MAX = 1600;
+    private static int LAUNCHER_SPEED = (int) (LAUNCHER_SPEED_MAX * LAUNCHER_SPEED_MULTIPLIER);
     public static final int INTAKE_TIME = 500;
     public static final int LAUNCH_TIME = 1000;
     public static final int TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING = 50;
@@ -55,16 +64,24 @@ public class Teleop extends LinearOpMode {
             rightStickX = Math.copySign(Math.pow(rightStickX, 2), rightStickX);
             double rotationPower = rightStickX;
 
+            if (gamepad1.dpad_right) {
+                LAUNCHER_SPEED += 50;
+            }
+
+            if (gamepad1.dpad_left) {
+                LAUNCHER_SPEED -= 50;
+            }
+
             if (gamepad1.leftBumperWasPressed()) {
                 launchServoUp = !launchServoUp;
                 launchTimer = 0;
             }
 
-            if ((gamepad1.a || gamepad1.dpad_down) && intakeTimer == 0) {
+            if ((gamepad1.left_trigger > 0.1 || gamepad1.dpad_down) && intakeTimer == 0) {
                 intakeTimer = System.currentTimeMillis();
                 launchServoUp = false;
                 resetLaunchMotors();
-                launcherRight.setVelocity(1000 * (gamepad1.a ? -1 : 1));
+                launcherRight.setVelocity(1000 * (gamepad1.dpad_down ? 1 : -1));
             }
 
             if (intakeTimer != 0 && System.currentTimeMillis() - intakeTimer > INTAKE_TIME) {
@@ -76,10 +93,10 @@ public class Teleop extends LinearOpMode {
             launchServo.setPosition(launchServoUp ? 0.75 : 0.55);
             telemetry.addData("Servo Position", launchServo.getPosition());
 
+            double velocity = Math.min(Math.abs(launcherLeft.getVelocity()), Math.abs(launcherRight.getVelocity()));
             if (intakeTimer == 0) {
                 launcherLeft.setVelocity(LAUNCHER_SPEED * gamepad1.right_trigger);
                 launcherRight.setVelocity(-LAUNCHER_SPEED * gamepad1.right_trigger);
-                double velocity = Math.min(launcherLeft.getVelocity(), launcherRight.getVelocity());
                 if (velocity > LAUNCHER_SPEED) {
 
                     launchServoUp = true;
@@ -92,10 +109,12 @@ public class Teleop extends LinearOpMode {
                 launchServoUp = false;
             }
 
+            telemetry.addLine("Launching");
             telemetry.addData("Launch servo up?", launchServoUp);
-            telemetry.addData("Launch Speed", LAUNCHER_SPEED);
+            telemetry.addData("Target Launch Speed", LAUNCHER_SPEED);
+            telemetry.addData("Current Launch Speed", velocity);
+            telemetry.addLine("Intake");
             telemetry.addData("Intake Timer", intakeTimer);
-            telemetry.addData("Launch Velocity", (launcherLeft.getVelocity() + launcherRight.getVelocity()) * 0.5);
             telemetry.addLine();
             telemetry.addData("Robot Position", chassis.pose);
 
