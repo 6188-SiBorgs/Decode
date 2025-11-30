@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
@@ -48,8 +49,9 @@ public class Teleop extends LinearOpMode {
         launcherRight = (DcMotorEx) hardwareMap.get(DcMotor.class, "launcherRight");
         Servo launchServo = hardwareMap.get(Servo.class, "launchServo");
 
-        launcherLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcherRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcherLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherRight.setDirection(DcMotorSimple.Direction.REVERSE);
         launcherLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcherRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
