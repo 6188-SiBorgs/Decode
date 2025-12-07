@@ -48,6 +48,7 @@ public class ThirdChassis extends AtlasChassis {
         PREPARE_INTAKE,
         INTAKING,
         FINALIZE_INTAKE,
+        COMPLETE
     }
 
     // Index =
@@ -167,9 +168,14 @@ public class ThirdChassis extends AtlasChassis {
                 break;
             case FINALIZE_INTAKE:
                 intakeMotor.setPower(0);
-                // todo calculate actual intake index from this because this uses top
-                int difference = Math.floorMod(artifacts.indexOf(Artifact.NONE) - getPosition() + 2, 3);
-                index += difference;
+                if (artifacts.contains(Artifact.NONE)) {
+                    int difference = Math.floorMod(artifacts.indexOf(Artifact.NONE) - getPosition() + 2, 3);
+                    index += difference;
+                    intakeState = IntakeState.PREPARE_INTAKE;
+                }
+                else {
+
+                }
 
                 break;
         }
@@ -224,11 +230,11 @@ public class ThirdChassis extends AtlasChassis {
         return greenMotifPosition == 0 ? Artifact.PURPLE : Artifact.GREEN;
     }
 
-    private int getPosition() {
+    public int getPosition() {
         return getPosition(0);
     }
 
-    private int getPosition(int offset) {
+    public int getPosition(int offset) {
         return Math.floorMod(index + offset, 3);
     }
 
