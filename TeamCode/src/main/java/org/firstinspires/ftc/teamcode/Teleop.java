@@ -19,7 +19,7 @@ public class Teleop extends LinearOpMode {
     private static final int LAUNCHER_SPEED = 1350;
     public static final int INTAKE_TIME = 500;
     public static final int LAUNCH_TIME = 1000;
-    public static final int TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING = 50;
+    public static final int TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING = 225;
 
     private DcMotorEx launcherLeft;
     private DcMotorEx launcherRight;
@@ -99,13 +99,14 @@ public class Teleop extends LinearOpMode {
             chassis.update(telemetry);
 
             if (rightStickX != 0) {
-                targetAngle = chassis.yawDeg;
                 rotationTimer = System.currentTimeMillis();
             } else if (System.currentTimeMillis() - rotationTimer > TIME_BEFORE_ORIENTATION_BASED_STATION_KEEPING) {
                 double angleError = getNormalizedAngle(targetAngle - chassis.yawDeg);
                 if (Math.abs(angleError) > maxRotationError) {
                     rotationPower = Math.max(-1.0, Math.min(-angleError / 45.0, 1.0));
                 }
+            } else {
+                targetAngle = chassis.yawDeg;
             }
             chassis.moveFieldRelative(leftStickX, leftStickY, rotationPower);
             telemetry.update();

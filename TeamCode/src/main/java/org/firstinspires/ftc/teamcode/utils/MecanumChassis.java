@@ -12,9 +12,11 @@ public class MecanumChassis extends AtlasChassis {
         super(opMode);
         ChassisConfig config = new ChassisConfig();
         config.frontLeftName = "frontLeft";
-        config.frontRightName = "frontRight";
+        config.frontRightName = "rearRight";
         config.backLeftName = "rearLeft";
-        config.backRightName = "rearRight";
+        config.backRightName = "frontRight";
+        config.backLeftIsReversed = true;
+        config.backRightIsReversed = true;
         config.imuParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,

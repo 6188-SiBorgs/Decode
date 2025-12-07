@@ -24,24 +24,29 @@ public class BezierUtils {
         int count = (int)(totalLength / spacing) + 1;
         for(int i = 0; i < count; i++){
             double target = Math.min(totalLength, i * spacing);
-            double t = 0;
-            int searcher = 0;
-            
-            while (searcher < lengths.length && lengths[searcher] < target) searcher++;
-            if (searcher == 0) t = 0;
-            else if (searcher >= lengths.length) t = 1;
-            else {
-                // lerp
-                double l0 = lengths[searcher - 1];
-                double l1 = lengths[searcher];
-                double ratio = (target - l0) / (l1 - l0);
-                double t0 = (double) (searcher - 1) / (points.length - 1);
-                double t1 = (double) (searcher) / (points.length - 1);
-                t = t0 + (t1 - t0) * ratio;
-            }
+            double t = solveT(lengths, target, points);
             result.add(getPointOnCubic(t, p0, p1, p2, p3));
         }
         return result;
+    }
+
+    private static double solveT(double[] lengths, double target, Vector2[] points) {
+        double t;
+        int searcher = 0;
+
+        while (searcher < lengths.length && lengths[searcher] < target) searcher++;
+        if (searcher == 0) t = 0;
+        else if (searcher >= lengths.length) t = 1;
+        else {
+            // lerp
+            double l0 = lengths[searcher - 1];
+            double l1 = lengths[searcher];
+            double ratio = (target - l0) / (l1 - l0);
+            double t0 = (double) (searcher - 1) / (points.length - 1);
+            double t1 = (double) (searcher) / (points.length - 1);
+            t = t0 + (t1 - t0) * ratio;
+        }
+        return t;
     }
 
     // omg cubic bezier curves so cool so wow

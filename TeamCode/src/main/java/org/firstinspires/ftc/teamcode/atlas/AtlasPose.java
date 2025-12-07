@@ -19,9 +19,6 @@ public class AtlasPose {
     public double x = 0.0;
     public double y = 0.0;
 
-    private double limelightX = 0.0;
-    private double limelightY = 0.0;
-    private double limelightT = 0.0;
 
     private final List<PastState> pastStates = new ArrayList<>();
 

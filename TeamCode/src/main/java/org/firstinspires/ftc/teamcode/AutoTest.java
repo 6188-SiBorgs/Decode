@@ -6,15 +6,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasAutoOp;
 import org.firstinspires.ftc.teamcode.atlas.atlasauto.AtlasParameters;
 import org.firstinspires.ftc.teamcode.utils.Chassis;
+import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 
-@Disabled
 @TeleOp(name="AutoTestSilly")
 public class AutoTest extends AtlasAutoOp {
     @Override
     public AtlasParameters create() {
-        XDriveChassis chassis = new XDriveChassis(this);
-        return new AtlasParameters(chassis, 0.02, 0.01, 0.05);
+        MecanumChassis chassis = new MecanumChassis(this);
+        return new AtlasParameters(chassis, 0.04, 0.01, 0.05);
     }
 
     @Override

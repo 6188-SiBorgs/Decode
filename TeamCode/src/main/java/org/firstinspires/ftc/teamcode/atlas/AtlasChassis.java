@@ -98,21 +98,6 @@ public abstract class AtlasChassis {
         movePower(rotatedX, rotatedY, rx);
     }
 
-    public void movePowerDegraded(double x, double y, double r) {
-        // Compute powers for the three working wheels (frontRight is broken)
-        double fl =  2*x + 2*r;
-        double bl =  2*y - 2*x;
-        double br =  2*y - 2*r;
-
-        // Normalize to [-1, 1] while preserving direction ratios
-        double denom = Math.max(1.0, Math.max(Math.abs(fl), Math.max(Math.abs(bl), Math.abs(br))));
-
-        frontLeft.setPower(fl / denom);
-        backLeft.setPower(bl / denom);
-        frontRight.setPower(0);        // broken
-        backRight.setPower(br / denom);
-    }
-
 
     public void runToPosition(int x, int y) {
         Vector2 vect = new Vector2(x, y);

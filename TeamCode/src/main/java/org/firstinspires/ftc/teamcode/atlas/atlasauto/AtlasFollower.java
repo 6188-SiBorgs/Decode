@@ -136,10 +136,14 @@ public class AtlasFollower {
     }
 
     private double positionTargetValue(double value) {
+        double result;
         if (-tolerance < value && value < tolerance) {
-            return value * 0.01;
+            result = value * 0.01;
         }
-        return value * 0.1;
+        else result = value * 0.1;
+
+        if (Math.abs(result) < 0.01) return 0;
+        else return result;
     }
 
     private double rotationTargetValue(double target, double current) {
