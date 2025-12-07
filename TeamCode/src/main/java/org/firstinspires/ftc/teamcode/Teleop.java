@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 // Right Trigger: Rotate shooter speed
 // A: Intake
 
-@TeleOp(name="Teleop")
+@TeleOp(name="Teleop_OLD")
 public class Teleop extends LinearOpMode {
     private static final int LAUNCHER_SPEED = 1350;
     public static final int INTAKE_TIME = 500;
