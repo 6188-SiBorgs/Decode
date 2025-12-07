@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.utils.Chassis;
-import org.firstinspires.ftc.teamcode.utils.Motifs;
+import org.firstinspires.ftc.teamcode.utils.Motif;
 @Disabled
 @TeleOp(name="TestMotif")
 public class TestMotif extends LinearOpMode {
@@ -14,7 +14,7 @@ public class TestMotif extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Chassis chassis = new Chassis(this);
         chassis.waitForStart(this);
-        Motifs motif = chassis.getMotif();
+        Motif motif = chassis.getMotif();
         telemetry.addLine(motif.name());
         telemetry.update();
         sleep(9999999);

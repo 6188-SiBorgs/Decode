@@ -62,7 +62,7 @@ public abstract class AtlasChassis {
         imu.resetYaw();
     }
 
-    private DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name, boolean reversed) {
+    public DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name, boolean reversed) {
         DcMotorEx motor = (DcMotorEx) hardwareMap.get(DcMotor.class, name);
         if (reversed) motor.setDirection(DcMotorSimple.Direction.REVERSE);
         else motor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -71,7 +71,7 @@ public abstract class AtlasChassis {
         motor.setZeroPowerBehavior(zeroPowerBehavior);
         return motor;
     }
-    private DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name) {
+    public DcMotorEx getDcMotorEx(HardwareMap hardwareMap, String name) {
         return getDcMotorEx(hardwareMap, name, false);
     }
 

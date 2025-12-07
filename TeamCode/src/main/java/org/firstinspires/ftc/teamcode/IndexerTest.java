@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.teamcode.utils.Motif;
+
 import java.util.ArrayList;
 
 @TeleOp(name = "Indexer Test")
@@ -13,7 +15,7 @@ public class IndexerTest extends OpMode {
     private int position = 0;
     private boolean intaking = false;
 
-    private int pattern = 0;
+    private Motif motif;
     private int purpleIndex = 0;
     private ArrayList<Integer> artifacts = new ArrayList<>();
 
@@ -21,7 +23,7 @@ public class IndexerTest extends OpMode {
 
     @Override
     public void init() {
-        purpleIndex = pattern;
+//        purpleIndex = pattern;
         artifacts.add(-1);
         artifacts.add(-1);
         artifacts.add(-1);

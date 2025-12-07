@@ -47,12 +47,12 @@ public class Chassis extends AtlasChassis {
         init(mecanumConfig);
     }
 
-    public Motifs getMotif() {
+    public Motif getMotif() {
         int id = getMotifId();
         System.out.println("Detected Motif: " + id);
-        if (id == 21) return Motifs.GREEN_PURPLE_PURPLE;
-        else if (id == 22) return Motifs.PURPLE_GREEN_PURPLE;
-        else if (id == 23) return Motifs.PURPLE_PURPLE_GREEN;
+        if (id == 21) return Motif.GREEN_PURPLE_PURPLE;
+        else if (id == 22) return Motif.PURPLE_GREEN_PURPLE;
+        else if (id == 23) return Motif.PURPLE_PURPLE_GREEN;
         else throw new RuntimeException("Failed to get motif");
     }
 
