@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.utils.Motif;
 
 import java.util.ArrayList;
 
+@Disabled
 @TeleOp(name = "Indexer Test")
 public class IndexerTest extends OpMode {
     private static final double TICKS_PER_INDEX = 28 * 18.8803 / 6;

@@ -51,6 +51,13 @@ public class ThirdChassis extends AtlasChassis {
         COMPLETE
     }
 
+    // Specifically for launching ANY ball (last resort if we cant get a motif)
+    private enum LaunchingState {
+        NONE,
+        PREPARING,
+        LAUNCHING
+    }
+
     // Index =
     private static final double TICKS_PER_POSITION = 28 * 18.8803 / 6;
     private int index = 0;
@@ -64,6 +71,10 @@ public class ThirdChassis extends AtlasChassis {
     private boolean spinLaunchMotors;
 
     private IntakeState intakeState = IntakeState.NONE;
+
+    private static final long TIME_TO_LAUNCH = 500;
+    private LaunchingState launchingState = LaunchingState.NONE;
+    private long launchTimer = 0;
 
     private final DcMotorEx indexerMotor, intakeMotor, leftLaunchMotor, rightLaunchMotor;
     private final Servo launchServo;
@@ -126,21 +137,18 @@ public class ThirdChassis extends AtlasChassis {
 
         switch (motifState) {
             case PREPARING:
-                if (indexerNotReady()) break;
-                if (getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
+                if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
                 launching = true;
                 boolean spinRight = indexOfNextBall() == getPosition(1);
-                if (spinRight) {
-                    index += 2;
-                } else {
-                    index -= 2;
-                }
+                if (spinRight) index += 2;
+                else index -= 2;
                 motifState = MotifState.LAUNCHING;
                 break;
             case LAUNCHING:
                 if (indexerMotor.isBusy()) break;
                 motifState = MotifState.NONE;
                 launching = false;
+                spinLaunchMotors = false;
                 break;
         }
 
@@ -178,6 +186,21 @@ public class ThirdChassis extends AtlasChassis {
 
                 break;
         }
+
+        switch (launchingState) {
+            case PREPARING:
+                if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
+                launching = true;
+                launchTimer = System.currentTimeMillis();
+                launchingState = LaunchingState.LAUNCHING;
+                break;
+            case LAUNCHING:
+                if (System.currentTimeMillis() - launchTimer < TIME_TO_LAUNCH) break;
+                launching = false;
+                spinLaunchMotors = false;
+                launchTimer = 0;
+                break;
+        }
     }
 
     @Override
@@ -200,6 +223,12 @@ public class ThirdChassis extends AtlasChassis {
         if (artifacts.stream().filter(a -> a.equals(Artifact.PURPLE)).count() != 2) return;
         prepareNextBall();
         motifState = MotifState.PREPARING;
+        spinLaunchMotors = true;
+    }
+
+    public void launchAnything() {
+        prepareNextBall();
+        launchingState = LaunchingState.PREPARING;
         spinLaunchMotors = true;
     }
 

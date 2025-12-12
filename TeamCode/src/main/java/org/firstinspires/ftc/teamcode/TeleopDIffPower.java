@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 // Right Trigger: Rotate shooter speed
 // A: Intake
 
+@Disabled
 @TeleOp(name="Teleop (for broken robot)")
 public class TeleopDIffPower extends LinearOpMode {
     private static final int LAUNCHER_SPEED = 1350;

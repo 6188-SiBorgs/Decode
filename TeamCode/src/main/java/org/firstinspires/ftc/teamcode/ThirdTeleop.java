@@ -5,8 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
+import org.firstinspires.ftc.teamcode.utils.Motif;
 import org.firstinspires.ftc.teamcode.utils.ThirdChassis;
 
 @TeleOp(name="Teleop")
@@ -20,6 +22,7 @@ public class ThirdTeleop extends LinearOpMode {
         ThirdChassis chassis = new ThirdChassis(this);
         chassis.waitForStart(this);
         chassis.imu.resetYaw();
+        chassis.indexerInit(Motif.GREEN_PURPLE_PURPLE, List.of(ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE));
         double targetAngle = 0;
 
         while (opModeIsActive()) {
@@ -30,10 +33,16 @@ public class ThirdTeleop extends LinearOpMode {
             double rotationPower = rightStickX;
 
             if (gamepad1.aWasPressed())
-               chassis.startIntaking();
+                chassis.startIntaking();
 
             if (gamepad1.aWasReleased())
                 chassis.stopIntaking();
+
+            if (gamepad1.rightBumperWasPressed())
+                chassis.launchMotif();
+
+            if (gamepad1.leftBumperWasPressed())
+                chassis.launchAnything();
 
             telemetry.addLine("Launch Data");
             telemetry.addData("Launch servo up?", chassis.launching);
