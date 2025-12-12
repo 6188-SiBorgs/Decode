@@ -118,7 +118,7 @@ public class ThirdChassis extends AtlasChassis {
 
     @Override
     public void tick() {
-        int indexerMotorPosition = index * 2 + (intakeState != IntakeState.NONE ? 1 : 0);
+        int indexerMotorPosition = index * 2 + (intakeState != IntakeState.NONE && intakeState != IntakeState.COMPLETE ? 1 : 0);
         int intakePosition = getPosition(2);
         int encoderPosition = (int) (TICKS_PER_POSITION * indexerMotorPosition);
         indexerMotor.setTargetPosition(encoderPosition);
@@ -129,7 +129,6 @@ public class ThirdChassis extends AtlasChassis {
                 if (indexerNotReady()) break;
                 if (getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
                 launching = true;
-                cycleMotif();
                 boolean spinRight = indexOfNextBall() == getPosition(1);
                 if (spinRight) {
                     index += 2;
@@ -174,7 +173,7 @@ public class ThirdChassis extends AtlasChassis {
                     intakeState = IntakeState.PREPARE_INTAKE;
                 }
                 else {
-
+                    intakeState = IntakeState.COMPLETE;
                 }
 
                 break;
