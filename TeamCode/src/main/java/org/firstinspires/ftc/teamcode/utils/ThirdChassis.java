@@ -12,7 +12,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.sun.tools.doclint.Env;
 
 import org.firstinspires.ftc.teamcode.atlas.AtlasChassis;
 import org.firstinspires.ftc.teamcode.atlas.ChassisConfig;
@@ -25,7 +24,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
