@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -14,7 +17,9 @@ import org.firstinspires.ftc.teamcode.atlas.ChassisConfig;
 import org.firstinspires.ftc.teamcode.atlas.utils.ColorUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public class ThirdChassis extends AtlasChassis {
     public static final double LAUNCH_SERVO_UPPER = 0;
@@ -31,6 +36,7 @@ public class ThirdChassis extends AtlasChassis {
     public static final double GREEN_BALL_GREEN = 0;
     public static final double GREEN_BALL_BLUE = 0;
 
+    public Limelight3A limelight;
     public enum Artifact {
         PURPLE,
         GREEN,
@@ -119,12 +125,36 @@ public class ThirdChassis extends AtlasChassis {
         rightLED = new DigitalLED(opMode.hardwareMap, "rightLED");
 
         colorSensor = opMode.hardwareMap.get(ColorSensor.class, "colorSensor");
+
+        limelight = opMode.hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
+    }
+
+    public int getMotifId() {
+        limelight.pipelineSwitch(1);
+        int id = -1;
+        while (id == -1) {
+            LLResult result = limelight.getLatestResult();
+            if (result.getPipelineIndex() != 1 || !result.isValid()) continue;
+            List<LLResultTypes.FiducialResult> tags = result.getFiducialResults();
+            if (!tags.isEmpty()) {
+                id = tags.get(0).getFiducialId();
+            }
+        }
+        limelight.pipelineSwitch(0);
+        return id;
     }
 
     public void indexerInit(Motif motif, Collection<Artifact> artifacts) {
         this.motif = motif;
         greenMotifPosition = this.motif.getIndex();
         this.artifacts.addAll(artifacts);
+    }
+
+    public void indexerInit(int motifId, Artifact... artifacts) {
+        greenMotifPosition = motifId - 21;
+        this.artifacts.addAll(Arrays.asList(artifacts));
     }
 
     @Override

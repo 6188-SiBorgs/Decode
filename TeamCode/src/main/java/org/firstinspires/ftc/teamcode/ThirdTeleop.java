@@ -22,7 +22,7 @@ public class ThirdTeleop extends LinearOpMode {
         ThirdChassis chassis = new ThirdChassis(this);
         chassis.waitForStart(this);
         chassis.imu.resetYaw();
-        chassis.indexerInit(Motif.GREEN_PURPLE_PURPLE, List.of(ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE));
+        chassis.indexerInit(chassis.getMotifId(), ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE);
         double targetAngle = 0;
 
         while (opModeIsActive()) {
