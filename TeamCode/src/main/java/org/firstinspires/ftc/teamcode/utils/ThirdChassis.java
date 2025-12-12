@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+import android.os.Environment;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -11,17 +12,29 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.sun.tools.doclint.Env;
 
 import org.firstinspires.ftc.teamcode.atlas.AtlasChassis;
 import org.firstinspires.ftc.teamcode.atlas.ChassisConfig;
 import org.firstinspires.ftc.teamcode.atlas.utils.ColorUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 public class ThirdChassis extends AtlasChassis {
+    public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/motifScannedWithLimelightDuringAutonomousToBeUsedInTeleopToMakeItEasierToAccess/";
+    private File motifSaveDirectory;
+    public static final String AUTONOMOUS_ARTIFACTS_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/artifactsLeftOverFromAutonomousSavedSoWeKnowWhatIsInTheIndexerDuringTeleop/artifacts.artifacts";
+    private File artifactsSaveFile;
+
     public static final double LAUNCH_SERVO_UPPER = 0;
     public static final double LAUNCH_SERVO_LOWER = 0;
     public static final double TARGET_LAUNCH_VELOCITY = 0;
@@ -89,7 +102,6 @@ public class ThirdChassis extends AtlasChassis {
 
     private ColorSensor colorSensor;
 
-
     public ThirdChassis(OpMode opMode) {
         super(opMode);
         ChassisConfig config = new ChassisConfig();
@@ -108,6 +120,20 @@ public class ThirdChassis extends AtlasChassis {
 
 
         init(config);
+
+        motifSaveDirectory = new File(PATH);
+        if (!motifSaveDirectory.exists())
+            motifSaveDirectory.mkdirs();
+
+        artifactsSaveFile = new File(AUTONOMOUS_ARTIFACTS_PATH);
+        if (!artifactsSaveFile.exists()) {
+            artifactsSaveFile.mkdirs();
+            try {
+                artifactsSaveFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         indexerMotor = getDcMotorEx(opMode.hardwareMap, "indexer");
         indexerMotor.setTargetPosition(0);
@@ -152,9 +178,9 @@ public class ThirdChassis extends AtlasChassis {
         this.artifacts.addAll(artifacts);
     }
 
-    public void indexerInit(int motifId, Artifact... artifacts) {
+    public void indexerInit(int motifId, Collection<Artifact> artifacts) {
         greenMotifPosition = motifId - 21;
-        this.artifacts.addAll(Arrays.asList(artifacts));
+        this.artifacts.addAll(artifacts);
     }
 
     @Override
@@ -314,5 +340,47 @@ public class ThirdChassis extends AtlasChassis {
 
     public boolean indexerNotReady() {
         return indexerMotor.isBusy();
+    }
+
+    public void saveMotifIdToFile() throws IOException {
+        int motifId = getMotifId();
+
+        if (!motifSaveDirectory.exists() || !motifSaveDirectory.isDirectory())
+            throw new IllegalArgumentException("Motif save directory does not exist!!! " + PATH);
+
+        File motifFile = new File(PATH + motifId + ".motif");
+        motifFile.createNewFile();
+    }
+
+    public void saveArtifactsToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(AUTONOMOUS_ARTIFACTS_PATH))) {
+            oos.writeObject(artifacts);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getSavedMotifId() {
+        if (!motifSaveDirectory.exists() || !motifSaveDirectory.isDirectory())
+            throw new IllegalArgumentException("Motif save directory does not exist!!! " + PATH);
+
+        File[] motifFiles = motifSaveDirectory.listFiles((dir, name) -> name.endsWith(".motif"));
+
+        if (motifFiles == null || motifFiles.length == 0)
+            throw new IllegalStateException("No motif files found!!!");
+
+        String fileName = motifFiles[0].getName();
+        String numberPart = fileName.substring(0, fileName.lastIndexOf(".motif"));
+
+        return Integer.parseInt(numberPart);
+    }
+
+    public ArrayList<Artifact> getSavedArtifacts() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(AUTONOMOUS_ARTIFACTS_PATH))) {
+            return (ArrayList<Artifact>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

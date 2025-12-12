@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.sun.tools.javac.util.List;
 
+import org.firstinspires.ftc.teamcode.utils.Artifacts;
 import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 import org.firstinspires.ftc.teamcode.utils.Motif;
 import org.firstinspires.ftc.teamcode.utils.ThirdChassis;
@@ -22,7 +23,8 @@ public class ThirdTeleop extends LinearOpMode {
         ThirdChassis chassis = new ThirdChassis(this);
         chassis.waitForStart(this);
         chassis.imu.resetYaw();
-        chassis.indexerInit(chassis.getMotifId(), ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE, ThirdChassis.Artifact.NONE);
+//        chassis.indexerInit(chassis.getSavedMotifId(), chassis.getSavedArtifacts());
+        chassis.indexerInit(Motif.GREEN_PURPLE_PURPLE, Artifacts.EMPTY);
         double targetAngle = 0;
 
         while (opModeIsActive()) {
