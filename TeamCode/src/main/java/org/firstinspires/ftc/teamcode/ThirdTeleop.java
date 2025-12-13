@@ -46,6 +46,12 @@ public class ThirdTeleop extends LinearOpMode {
             if (gamepad1.leftBumperWasPressed())
                 chassis.launchAnything();
 
+            if (gamepad1.dpadRightWasPressed())
+                chassis.manualOverrideCycleMotif(1);
+
+            if (gamepad1.dpadRightWasPressed())
+                chassis.manualOverrideCycleMotif(-1);
+
             telemetry.addLine("Launch Data");
             telemetry.addData("Launch servo up?", chassis.launching);
             telemetry.addData("Target Launch Velocity", ThirdChassis.TARGET_LAUNCH_VELOCITY);
@@ -55,6 +61,7 @@ public class ThirdTeleop extends LinearOpMode {
             telemetry.addLine();
             telemetry.addLine("Indexer Data");
             telemetry.addData("Current Position", chassis.getPosition());
+            telemetry.addData("Current Motif", chassis.motif.toString());
 
             chassis.update(telemetry);
 

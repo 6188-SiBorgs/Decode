@@ -29,9 +29,9 @@ import java.util.List;
 
 public class ThirdChassis extends AtlasChassis {
     public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/motifScannedWithLimelightDuringAutonomousToBeUsedInTeleopToMakeItEasierToAccess/";
-    private File motifSaveDirectory;
+    private final File motifSaveDirectory;
     public static final String AUTONOMOUS_ARTIFACTS_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/artifactsLeftOverFromAutonomousSavedSoWeKnowWhatIsInTheIndexerDuringTeleop/artifacts.artifacts";
-    private File artifactsSaveFile;
+    private final File artifactsSaveFile;
 
     public static final double LAUNCH_SERVO_UPPER = 0;
     public static final double LAUNCH_SERVO_LOWER = 0;
@@ -79,7 +79,7 @@ public class ThirdChassis extends AtlasChassis {
     private static final double TICKS_PER_POSITION = 28 * 18.8803 / 6;
     private int index = 0;
 
-    private Motif motif;
+    public Motif motif;
     private int greenMotifPosition = 0;
     private ArrayList<Artifact> artifacts = new ArrayList<>();
 
@@ -145,8 +145,8 @@ public class ThirdChassis extends AtlasChassis {
 
         launchServo = opMode.hardwareMap.get(Servo.class, "launchServo");
 
-        leftLED = new DigitalLED(opMode.hardwareMap, "LeftLED");
-        rightLED = new DigitalLED(opMode.hardwareMap, "rightLED");
+//        leftLED = new DigitalLED(opMode.hardwareMap, "LeftLED");
+//        rightLED = new DigitalLED(opMode.hardwareMap, "rightLED");
 
         colorSensor = opMode.hardwareMap.get(ColorSensor.class, "colorSensor");
 
@@ -157,13 +157,16 @@ public class ThirdChassis extends AtlasChassis {
 
     public int getMotifId() {
         limelight.pipelineSwitch(1);
+        long startTime = System.currentTimeMillis();
+        long TIME_OUT = 2000;
         int id = -1;
-        while (id == -1) {
+        while (id == -1 && System.currentTimeMillis() - startTime < TIME_OUT) {
             LLResult result = limelight.getLatestResult();
-            if (result.getPipelineIndex() != 1 || !result.isValid()) continue;
-            List<LLResultTypes.FiducialResult> tags = result.getFiducialResults();
-            if (!tags.isEmpty()) {
-                id = tags.get(0).getFiducialId();
+            if (!(result.getPipelineIndex() != 1 || !result.isValid())) {
+                List<LLResultTypes.FiducialResult> tags = result.getFiducialResults();
+                if (!tags.isEmpty()) {
+                    id = tags.get(0).getFiducialId();
+                }
             }
         }
         limelight.pipelineSwitch(0);
@@ -177,8 +180,19 @@ public class ThirdChassis extends AtlasChassis {
     }
 
     public void indexerInit(int motifId, Collection<Artifact> artifacts) {
+        if (motifId == -1) {
+            System.out.println("No motif found, defaulting");
+            motifId = 21;
+        }
         greenMotifPosition = motifId - 21;
+        this.motif = Motif.getMotifFromIndex(motifId);
         this.artifacts.addAll(artifacts);
+    }
+
+    public void manualOverrideCycleMotif(int amount) {
+        int newIndex = Math.floorMod(motif.getIndex() + amount, 3);
+        motif = Motif.getMotifFromIndex(newIndex);
+        greenMotifPosition = newIndex;
     }
 
     @Override
@@ -351,7 +365,7 @@ public class ThirdChassis extends AtlasChassis {
     }
 
     public void saveArtifactsToFile() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(AUTONOMOUS_ARTIFACTS_PATH))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(artifactsSaveFile))) {
             oos.writeObject(artifacts);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -374,7 +388,7 @@ public class ThirdChassis extends AtlasChassis {
     }
 
     public ArrayList<Artifact> getSavedArtifacts() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(AUTONOMOUS_ARTIFACTS_PATH))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(artifactsSaveFile))) {
             return (ArrayList<Artifact>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
