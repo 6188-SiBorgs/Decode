@@ -97,7 +97,6 @@ public class ThirdTeleopTheSecond extends LinearOpMode {
             telemetry.addData("Launch Speed", chassis.getLaunchVelocity());
 
 
-
             double rotationPower = 0;
             if (rightStickX != 0) {
                 rotationTimer = System.currentTimeMillis();
