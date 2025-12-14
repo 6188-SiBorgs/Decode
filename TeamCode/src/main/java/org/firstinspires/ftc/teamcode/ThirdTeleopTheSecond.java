@@ -25,7 +25,7 @@ public class ThirdTeleopTheSecond extends LinearOpMode {
 
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
         ThirdChassis chassis = new ThirdChassis(this);
         chassis.indexerInit(Motif.GREEN_PURPLE_PURPLE, Artifacts.EMPTY);
         chassis.waitForStart(this);
@@ -53,7 +53,14 @@ public class ThirdTeleopTheSecond extends LinearOpMode {
             } else {
                 intaking = false;
                 chassis.intakeMotor.setVelocity(0);
+                if (chassis.colorSensor.alpha() > 100) {
+                    boolean isGreen = chassis.colorSensor.green() > 80;
+                    int intakePosition = Math.floorMod(chassis.getPosition() + 2, 3);
+                    chassis.setArtifact(intakePosition, isGreen ? ThirdChassis.Artifact.GREEN : ThirdChassis.Artifact.PURPLE);
+                }
             }
+
+            if (gamepad1.yWasPressed()) chassis.prepareNextBall();
 
             int indexerMotorPosition = continuousIndex * 2 + (intaking ? 1 : 0);
             int encoderPosition = (int) (TICKS_PER_POSITION * indexerMotorPosition);

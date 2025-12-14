@@ -285,6 +285,10 @@ public class ThirdChassis extends AtlasChassis {
 
     }
 
+    public void setArtifact(int index, Artifact artifact) {
+        artifacts.set(index, artifact);
+    }
+
     public void startIntaking() {
         intakeState = IntakeState.PREPARE_INTAKE;
         // Get nearest intake
