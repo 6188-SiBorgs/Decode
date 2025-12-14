@@ -39,9 +39,9 @@ public class ThirdChassis extends AtlasChassis {
     public static final String AUTONOMOUS_ARTIFACTS_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/artifactsLeftOverFromAutonomousSavedSoWeKnowWhatIsInTheIndexerDuringTeleop/artifacts.artifacts";
     private final File artifactsSaveFile;
 
-    public static final double LAUNCH_SERVO_UPPER = 0;
-    public static final double LAUNCH_SERVO_LOWER = 0;
-    public static final double TARGET_LAUNCH_VELOCITY = 0;
+    public static final double LAUNCH_SERVO_UPPER = 0.8;
+    public static final double LAUNCH_SERVO_LOWER = 0.38;
+    public static final double TARGET_LAUNCH_VELOCITY = 1340;
 
     public static final double COLOR_DIST_COUNT = 0.05;
 
@@ -99,12 +99,12 @@ public class ThirdChassis extends AtlasChassis {
     private LaunchingState launchingState = LaunchingState.NONE;
     private long launchTimer = 0;
 
-    private final DcMotorEx indexerMotor, intakeMotor, leftLaunchMotor, rightLaunchMotor;
-    private final Servo launchServo;
+    public final DcMotorEx indexerMotor, intakeMotor, leftLaunchMotor, rightLaunchMotor;
+    public final Servo launchServo;
 
-    private DigitalLED leftLED, rightLED;
+    public DigitalLED leftLED, rightLED;
 
-    private ColorSensor colorSensor;
+    public ColorSensor colorSensor;
 
     public ThirdChassis(OpMode opMode) {
         super(opMode);
@@ -202,81 +202,81 @@ public class ThirdChassis extends AtlasChassis {
 
     @Override
     public void tick() {
-        int indexerMotorPosition = index * 2 + (intakeState != IntakeState.NONE && intakeState != IntakeState.COMPLETE ? 1 : 0);
-        int intakePosition = getPosition(2);
-        int encoderPosition = (int) (TICKS_PER_POSITION * indexerMotorPosition);
-        indexerMotor.setTargetPosition(encoderPosition);
-        indexerMotor.setPower(0.25);
-        changeLEDColor(DigitalLED.Color.AMBER);
-        leftLED.update();
-        rightLED.update();
-
-        switch (motifState) {
-            case PREPARING:
-                if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
-                launching = true;
-                boolean spinRight = indexOfNextBall() == getPosition(1);
-                if (spinRight) index += 2;
-                else index -= 2;
-                motifState = MotifState.LAUNCHING;
-                break;
-            case LAUNCHING:
-                if (indexerMotor.isBusy()) break;
-                motifState = MotifState.NONE;
-                launching = false;
-                spinLaunchMotors = false;
-                break;
-        }
-
-        launchServo.setPosition(launching ? LAUNCH_SERVO_UPPER : LAUNCH_SERVO_LOWER);
-        leftLaunchMotor.setVelocity(spinLaunchMotors ? TARGET_LAUNCH_VELOCITY : 0);
-        rightLaunchMotor.setVelocity(spinLaunchMotors ? TARGET_LAUNCH_VELOCITY : 0);
-
-        switch (intakeState) {
-            case PREPARE_INTAKE:
-                if (indexerNotReady()) break;
-                intakeMotor.setPower(0.1);
-                break;
-            case INTAKING:
-                double purpleDist = ColorUtils.colorDist(PURPLE_BALL_RED, PURPLE_BALL_GREEN, PURPLE_BALL_BLUE, colorSensor.red(), colorSensor.blue(), colorSensor.green());
-                double greenDist = ColorUtils.colorDist(GREEN_BALL_RED, GREEN_BALL_GREEN, GREEN_BALL_BLUE, colorSensor.red(), colorSensor.blue(), colorSensor.green());
-
-                if (purpleDist < COLOR_DIST_COUNT) {
-                    artifacts.set(intakePosition, Artifact.PURPLE);
-                } else if (greenDist < COLOR_DIST_COUNT) {
-                    artifacts.set(intakePosition, Artifact.GREEN);
-                } else break;
-
-                intakeState = IntakeState.FINALIZE_INTAKE;
-                break;
-            case FINALIZE_INTAKE:
-                intakeMotor.setPower(0);
-                if (artifacts.contains(Artifact.NONE)) {
-                    int difference = Math.floorMod(artifacts.indexOf(Artifact.NONE) - getPosition() + 2, 3);
-                    index += difference;
-                    intakeState = IntakeState.PREPARE_INTAKE;
-                }
-                else {
-                    intakeState = IntakeState.COMPLETE;
-                }
-
-                break;
-        }
-
-        switch (launchingState) {
-            case PREPARING:
-                if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
-                launching = true;
-                launchTimer = System.currentTimeMillis();
-                launchingState = LaunchingState.LAUNCHING;
-                break;
-            case LAUNCHING:
-                if (System.currentTimeMillis() - launchTimer < TIME_TO_LAUNCH) break;
-                launching = false;
-                spinLaunchMotors = false;
-                launchTimer = 0;
-                break;
-        }
+//        int indexerMotorPosition = index * 2 + (intakeState != IntakeState.NONE && intakeState != IntakeState.COMPLETE ? 1 : 0);
+//        int intakePosition = getPosition(2);
+//        int encoderPosition = (int) (TICKS_PER_POSITION * indexerMotorPosition);
+//        indexerMotor.setTargetPosition(encoderPosition);
+//        indexerMotor.setPower(0.25);
+//        changeLEDColor(DigitalLED.Color.AMBER);
+//        leftLED.update();
+//        rightLED.update();
+//
+//        switch (motifState) {
+//            case PREPARING:
+//                if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
+//                launching = true;
+//                boolean spinRight = indexOfNextBall() == getPosition(1);
+//                if (spinRight) index += 2;
+//                else index -= 2;
+//                motifState = MotifState.LAUNCHING;
+//                break;
+//            case LAUNCHING:
+//                if (indexerMotor.isBusy()) break;
+//                motifState = MotifState.NONE;
+//                launching = false;
+//                spinLaunchMotors = false;
+//                break;
+//        }
+//
+//        launchServo.setPosition(launching ? LAUNCH_SERVO_UPPER : LAUNCH_SERVO_LOWER);
+//        leftLaunchMotor.setVelocity(spinLaunchMotors ? TARGET_LAUNCH_VELOCITY : 0);
+//        rightLaunchMotor.setVelocity(spinLaunchMotors ? TARGET_LAUNCH_VELOCITY : 0);
+//
+//        switch (intakeState) {
+//            case PREPARE_INTAKE:
+//                if (indexerNotReady()) break;
+//                intakeMotor.setPower(0.1);
+//                break;
+//            case INTAKING:
+//                double purpleDist = ColorUtils.colorDist(PURPLE_BALL_RED, PURPLE_BALL_GREEN, PURPLE_BALL_BLUE, colorSensor.red(), colorSensor.blue(), colorSensor.green());
+//                double greenDist = ColorUtils.colorDist(GREEN_BALL_RED, GREEN_BALL_GREEN, GREEN_BALL_BLUE, colorSensor.red(), colorSensor.blue(), colorSensor.green());
+//
+//                if (purpleDist < COLOR_DIST_COUNT) {
+//                    artifacts.set(intakePosition, Artifact.PURPLE);
+//                } else if (greenDist < COLOR_DIST_COUNT) {
+//                    artifacts.set(intakePosition, Artifact.GREEN);
+//                } else break;
+//
+//                intakeState = IntakeState.FINALIZE_INTAKE;
+//                break;
+//            case FINALIZE_INTAKE:
+//                intakeMotor.setPower(0);
+//                if (artifacts.contains(Artifact.NONE)) {
+//                    int difference = Math.floorMod(artifacts.indexOf(Artifact.NONE) - getPosition() + 2, 3);
+//                    index += difference;
+//                    intakeState = IntakeState.PREPARE_INTAKE;
+//                }
+//                else {
+//                    intakeState = IntakeState.COMPLETE;
+//                }
+//
+//                break;
+//        }
+//
+//        switch (launchingState) {
+//            case PREPARING:
+//                if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
+//                launching = true;
+//                launchTimer = System.currentTimeMillis();
+//                launchingState = LaunchingState.LAUNCHING;
+//                break;
+//            case LAUNCHING:
+//                if (System.currentTimeMillis() - launchTimer < TIME_TO_LAUNCH) break;
+//                launching = false;
+//                spinLaunchMotors = false;
+//                launchTimer = 0;
+//                break;
+//        }
     }
 
     @Override
@@ -350,7 +350,7 @@ public class ThirdChassis extends AtlasChassis {
     }
 
     public double getLaunchVelocity() {
-        return (leftLaunchMotor.getVelocity() + rightLaunchMotor.getVelocity()) / 2.0;
+        return (Math.abs(leftLaunchMotor.getVelocity()) + Math.abs(rightLaunchMotor.getVelocity())) / 2.0;
     }
 
     public void changeLEDColor(DigitalLED.Color color) {

@@ -22,6 +22,7 @@ public class ServoTester4000 extends LinearOpMode {
             if (gamepad1.dpadLeftWasPressed()) servoPosition += 0.1;
             if (gamepad1.dpadRightWasPressed()) servoPosition -= 0.1;
 
+
             servoPosition = Range.clip(servoPosition, 0.0, 1.0);
 
             servo.setPosition(servoPosition);
