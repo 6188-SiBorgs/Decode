@@ -34,7 +34,6 @@ public class ThirdTeleopTheSecond extends LinearOpMode {
             if (gamepad1.leftBumperWasPressed()) continuousIndex--;
             if (gamepad1.rightBumperWasPressed()) continuousIndex++;
 
-
             double rotationPower = 0;
             if (rightStickX != 0) {
                 rotationTimer = System.currentTimeMillis();

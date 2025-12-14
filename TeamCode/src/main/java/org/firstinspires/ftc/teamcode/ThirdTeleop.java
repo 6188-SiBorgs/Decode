@@ -2,13 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.teamcode.utils.Artifacts;
-import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 import org.firstinspires.ftc.teamcode.utils.Motif;
 import org.firstinspires.ftc.teamcode.utils.ThirdChassis;
 
@@ -53,7 +48,8 @@ public class ThirdTeleop extends LinearOpMode {
                 chassis.manualOverrideCycleMotif(-1);
 
             telemetry.addLine("Launch Data");
-            telemetry.addData("Launch servo up?", chassis.launching);
+            telemetry.addData("Current Motif", chassis.motif.toString());
+            telemetry.addData("Launch servo up?", chassis.servoDown);
             telemetry.addData("Target Launch Velocity", ThirdChassis.TARGET_LAUNCH_VELOCITY);
             telemetry.addData("Current Launch Velocity", chassis.getLaunchVelocity());
             telemetry.addLine();
@@ -61,7 +57,6 @@ public class ThirdTeleop extends LinearOpMode {
             telemetry.addLine();
             telemetry.addLine("Indexer Data");
             telemetry.addData("Current Position", chassis.getPosition());
-            telemetry.addData("Current Motif", chassis.motif.toString());
 
             chassis.update(telemetry);
 

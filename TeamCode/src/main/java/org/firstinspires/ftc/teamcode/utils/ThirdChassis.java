@@ -90,7 +90,10 @@ public class ThirdChassis extends AtlasChassis {
     private ArrayList<Artifact> artifacts = new ArrayList<>();
 
     private MotifState motifState = MotifState.NONE;
-    public boolean launching;
+    private static final long SERVO_TIME = 500;
+    public boolean servoDown;
+    public long servoTimer = 0;
+    public boolean servoWaiting;
     private boolean spinLaunchMotors;
 
     private IntakeState intakeState = IntakeState.NONE;
@@ -211,10 +214,16 @@ public class ThirdChassis extends AtlasChassis {
         leftLED.update();
         rightLED.update();
 
-        switch (motifState) {
+        launchServo.setPosition(servoDown ? LAUNCH_SERVO_UPPER : LAUNCH_SERVO_LOWER);
+        if (System.currentTimeMillis() - servoTimer > SERVO_TIME) {
+            servoWaiting = false;
+        }
+
+        if (!servoWaiting) switch (motifState) {
             case PREPARING:
                 if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
-                launching = true;
+                servoDown = true;
+                servoUpdate();
                 boolean spinRight = indexOfNextBall() == getPosition(1);
                 if (spinRight) index += 2;
                 else index -= 2;
@@ -223,16 +232,16 @@ public class ThirdChassis extends AtlasChassis {
             case LAUNCHING:
                 if (indexerMotor.isBusy()) break;
                 motifState = MotifState.NONE;
-                launching = false;
+                servoDown = false;
+                servoUpdate();
                 spinLaunchMotors = false;
                 break;
         }
 
-        launchServo.setPosition(launching ? LAUNCH_SERVO_UPPER : LAUNCH_SERVO_LOWER);
         leftLaunchMotor.setVelocity(spinLaunchMotors ? TARGET_LAUNCH_VELOCITY : 0);
         rightLaunchMotor.setVelocity(spinLaunchMotors ? TARGET_LAUNCH_VELOCITY : 0);
 
-        switch (intakeState) {
+        if (!servoWaiting) switch (intakeState) {
             case PREPARE_INTAKE:
                 if (indexerNotReady()) break;
                 intakeMotor.setPower(0.1);
@@ -263,16 +272,18 @@ public class ThirdChassis extends AtlasChassis {
                 break;
         }
 
-        switch (launchingState) {
+        if (!servoWaiting) switch (launchingState) {
             case PREPARING:
                 if (indexerNotReady() || getLaunchVelocity() < TARGET_LAUNCH_VELOCITY) break;
-                launching = true;
+                servoDown = true;
+                servoUpdate();
                 launchTimer = System.currentTimeMillis();
                 launchingState = LaunchingState.LAUNCHING;
                 break;
             case LAUNCHING:
                 if (System.currentTimeMillis() - launchTimer < TIME_TO_LAUNCH) break;
-                launching = false;
+                servoDown = false;
+                servoUpdate();
                 spinLaunchMotors = false;
                 launchTimer = 0;
                 break;
@@ -281,8 +292,12 @@ public class ThirdChassis extends AtlasChassis {
 
     @Override
     public void initLoop(OpMode opMode) {
-        launchServo.setPosition(launching ? LAUNCH_SERVO_UPPER : LAUNCH_SERVO_LOWER);
+        launchServo.setPosition(servoDown ? LAUNCH_SERVO_UPPER : LAUNCH_SERVO_LOWER);
+    }
 
+    public void servoUpdate() {
+        servoTimer = System.currentTimeMillis();
+        servoWaiting = true;
     }
 
     public void startIntaking() {
