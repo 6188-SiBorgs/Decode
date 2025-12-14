@@ -49,7 +49,7 @@ public class ThirdTeleop extends LinearOpMode {
 
             telemetry.addLine("Launch Data");
             telemetry.addData("Current Motif", chassis.motif.toString());
-            telemetry.addData("Launch servo up?", chassis.servoDown);
+//            telemetry.addData("Launch servo up?", chassis);
             telemetry.addData("Target Launch Velocity", ThirdChassis.TARGET_LAUNCH_VELOCITY);
             telemetry.addData("Current Launch Velocity", chassis.getLaunchVelocity());
             telemetry.addLine();
