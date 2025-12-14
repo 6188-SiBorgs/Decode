@@ -30,6 +30,9 @@ public class Teleop extends LinearOpMode {
     long launchTimer = 0L;
     long rotationTimer = 0L;
 
+    // 50 30 40
+    //Green > 50
+
     @Override
     public void runOpMode() {
         MecanumChassis chassis = new MecanumChassis(this);

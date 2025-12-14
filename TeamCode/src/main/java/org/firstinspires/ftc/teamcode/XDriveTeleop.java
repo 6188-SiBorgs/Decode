@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.utils.Chassis;
 import org.firstinspires.ftc.teamcode.utils.MecanumChassis;
 import org.firstinspires.ftc.teamcode.utils.XDriveChassis;
 
-@Disabled
 @TeleOp(name = ".XDriveTeleop", group = "XDrive")
 public class XDriveTeleop extends OpMode {
     DcMotorEx leftFront, leftBack, rightFront, rightBack;

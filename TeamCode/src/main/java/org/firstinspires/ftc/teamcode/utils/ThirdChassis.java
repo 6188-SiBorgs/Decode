@@ -27,6 +27,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+
+/*
+* WIRES;
+*
+* */
+
 public class ThirdChassis extends AtlasChassis {
     public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/motifScannedWithLimelightDuringAutonomousToBeUsedInTeleopToMakeItEasierToAccess/";
     private final File motifSaveDirectory;
@@ -104,11 +110,10 @@ public class ThirdChassis extends AtlasChassis {
         super(opMode);
         ChassisConfig config = new ChassisConfig();
         config.frontLeftName = "frontLeft";
-        config.frontRightName = "rearRight";
+        config.frontRightName = "frontRight";
         config.backLeftName = "rearLeft";
-        config.backRightName = "frontRight";
-        config.backRightIsReversed = true;
-        config.frontRightIsReversed = true;
+        config.backRightName = "rearRight";
+        config.backLeftIsReversed = true;
         config.imuParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -145,8 +150,8 @@ public class ThirdChassis extends AtlasChassis {
 
         launchServo = opMode.hardwareMap.get(Servo.class, "launchServo");
 
-//        leftLED = new DigitalLED(opMode.hardwareMap, "LeftLED");
-//        rightLED = new DigitalLED(opMode.hardwareMap, "rightLED");
+        leftLED = new DigitalLED(opMode.hardwareMap, "leftLED");
+        rightLED = new DigitalLED(opMode.hardwareMap, "rightLED");
 
         colorSensor = opMode.hardwareMap.get(ColorSensor.class, "colorSensor");
 
@@ -202,6 +207,9 @@ public class ThirdChassis extends AtlasChassis {
         int encoderPosition = (int) (TICKS_PER_POSITION * indexerMotorPosition);
         indexerMotor.setTargetPosition(encoderPosition);
         indexerMotor.setPower(0.25);
+        changeLEDColor(DigitalLED.Color.AMBER);
+        leftLED.update();
+        rightLED.update();
 
         switch (motifState) {
             case PREPARING:

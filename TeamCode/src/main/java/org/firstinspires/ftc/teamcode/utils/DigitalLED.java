@@ -15,8 +15,8 @@ public class DigitalLED {
     public Color color = Color.NONE;
 
     public DigitalLED(HardwareMap hardwareMap, String name) {
-        redLED = hardwareMap.get(DigitalChannel.class, name + "Red");
-        greenLED = hardwareMap.get(DigitalChannel.class, name + "Green");
+        redLED = hardwareMap.get(DigitalChannel.class, name + "_red");
+        greenLED = hardwareMap.get(DigitalChannel.class, name + "_green");
         redLED.setMode(DigitalChannel.Mode.OUTPUT);
         greenLED.setMode(DigitalChannel.Mode.OUTPUT);
     }

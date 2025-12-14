@@ -77,8 +77,8 @@ public abstract class AtlasChassis {
 
     public void moveFieldRelative(double x, double y, double rx) {
         double yaw = yawRads + fieldRelativeOffset;
-        double rotatedX = x * Math.cos(-yaw) - y * Math.sin(-yaw);
-        double rotatedY = x * Math.sin(-yaw) + y * Math.cos(-yaw);
+        double rotatedX = -x * Math.cos(yaw) - y * Math.sin(yaw);
+        double rotatedY = -x * Math.sin(yaw) + y * Math.cos(yaw);
         movePower(rotatedX, rotatedY, rx);
     }
 
